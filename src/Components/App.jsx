@@ -4,7 +4,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 import { Input } from '../components/ui/input';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { ethers } from 'ethers';
-import { Toaster } from '../components/ui/sonner';
+import { Toaster } from './ui/sonner';
 import { notifySuccess, notifyError } from '../lib/notify';
 import AIQ_logo from '../assets/AIQ_logo.png';
 import search_icon from '../assets/search_icon.png';
