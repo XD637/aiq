@@ -1,13 +1,18 @@
 import React from 'react';
 import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Input } from '../components/ui/input';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { ethers } from 'ethers';
+import { Toaster } from '../components/ui/sonner';
+import { notifySuccess, notifyError } from '../lib/notify';
 import AIQ_logo from '../assets/AIQ_logo.png';
 import search_icon from '../assets/search_icon.png';
 import fff from '../assets/MintIcon.png';
 import i_icon from '../assets/i_icon.svg';
 
 function App() {
+
   // Mint states
   const [loading, setLoading] = React.useState(false);
   const [mintStep, setMintStep] = React.useState('idle'); // idle | approving | confirming | minting
@@ -27,6 +32,22 @@ function App() {
   const [claimPlan, setClaimPlan] = React.useState('THREE_MONTHS');
   const [claimLoading, setClaimLoading] = React.useState(false);
   const [claimStep, setClaimStep] = React.useState('idle'); // idle | confirming | claiming
+
+  // Animated ellipsis for status text
+  const [dotCount, setDotCount] = React.useState(0);
+  React.useEffect(() => {
+    let interval;
+    if (loading || stakeLoading || claimLoading) {
+      interval = setInterval(() => {
+        setDotCount((prev) => (prev + 1) % 4);
+      }, 500);
+    } else {
+      setDotCount(0);
+    }
+    return () => clearInterval(interval);
+  }, [loading, stakeLoading, claimLoading]);
+
+  const dots = '.'.repeat(dotCount);
 
   // Stablecoin addresses and decimals
   const stablecoins = {
@@ -53,15 +74,15 @@ function App() {
   }
   const handleMint = async () => {
     if (!isConnected) {
-      alert('Please connect your wallet first.');
+      notifyError('Please connect your wallet first.');
       return;
     }
     if (!window.ethereum) {
-      alert('No wallet found!');
+      notifyError('No wallet found!');
       return;
     }
     if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-      alert('Enter a valid amount');
+      notifyError('Enter a valid amount');
       return;
     }
     setLoading(true);
@@ -83,11 +104,11 @@ function App() {
       await tx.wait();
       setLoading(false);
       setMintStep('idle');
-      alert('Mint successful!');
+  notifySuccess('Mint successful!');
     } catch (err) {
       setLoading(false);
       setMintStep('idle');
-      alert('Mint failed: ' + (err?.message || err));
+  notifyError('Mint failed: ' + (err?.message || err));
     }
   };
 
@@ -101,15 +122,15 @@ function App() {
   // Stake handler
   const handleStake = async () => {
     if (!isConnected) {
-      alert('Please connect your wallet first.');
+      notifyError('Please connect your wallet first.');
       return;
     }
     if (!window.ethereum) {
-      alert('No wallet found!');
+      notifyError('No wallet found!');
       return;
     }
     if (!stakeAmount || isNaN(stakeAmount) || parseFloat(stakeAmount) <= 0) {
-      alert('Enter a valid AIQ amount');
+      notifyError('Enter a valid AIQ amount');
       return;
     }
     setStakeLoading(true);
@@ -130,22 +151,22 @@ function App() {
       await tx.wait();
       setStakeLoading(false);
       setStakeStep('idle');
-      alert('Stake successful!');
+  notifySuccess('Stake successful!');
     } catch (err) {
       setStakeLoading(false);
       setStakeStep('idle');
-      alert('Stake failed: ' + (err?.message || err));
+  notifyError('Stake failed: ' + (err?.message || err));
     }
   };
 
   // Claim rewards handler
   const handleClaimRewards = async () => {
     if (!isConnected) {
-      alert('Please connect your wallet first.');
+      notifyError('Please connect your wallet first.');
       return;
     }
     if (!window.ethereum) {
-      alert('No wallet found!');
+      notifyError('No wallet found!');
       return;
     }
     setClaimLoading(true);
@@ -159,265 +180,240 @@ function App() {
       await tx.wait();
       setClaimLoading(false);
       setClaimStep('idle');
-      alert('Claim successful!');
+  notifySuccess('Claim successful!');
     } catch (err) {
       setClaimLoading(false);
       setClaimStep('idle');
-      alert('Claim failed: ' + (err?.message || err));
+  notifyError('Claim failed: ' + (err?.message || err));
     }
   };
 
   return (
-    <div className="h-screen">
-      <div className="flex justify-between items-center bg-[#131313] px-[120px] py-[14px] text-white font-[Haas_Grot_Disp_Trial]">
-        <div>
-          <img src={AIQ_logo} alt="AiQ logo" />
+    <>
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            background: '#111',
+            color: '#fff',
+            border: '1px solid #333',
+          },
+          className: 'font-medium',
+        }}
+      />
+      <div className="h-screen">
+        <div className="flex justify-between items-center bg-[#131313] px-[120px] py-[14px] text-white font-[Haas_Grot_Disp_Trial]">
+          <div>
+            <img src={AIQ_logo} alt="AiQ logo" />
+          </div>
+          <div>
+            <a href="">products</a>
+            <a href="" className="px-[40px]">Market</a>
+            <a href="">$AIG</a>
+          </div>
+          <div className="flex items-center relative" style={{ zIndex: 20 }}>
+            <ConnectButton.Custom>
+              {({ account, openConnectModal, mounted }) => {
+                return (
+                  <button
+                    className="whitespace-nowrap mr-[32px] border-white border font-medium bg-black rounded-xl py-2 px-7 shadows relative cursor-pointer"
+                    style={{
+                      background:
+                        "radial-gradient(circle at 85% -30%, rgba(255,255,255,0.3), transparent 30%)",
+                    }}
+                    onClick={account ? disconnect : openConnectModal}
+                  >
+                    {account
+                      ? `${account.displayName} (Disconnect)`
+                      : 'connect wallet'}
+                  </button>
+                );
+              }}
+            </ConnectButton.Custom>
+            <div className="main-shadow"></div>
+            <div className="sub-shadow"></div>
+            <img src={search_icon} alt="" className="h-6 w-6" />
+          </div>
         </div>
-
-        <div>
-          <a href="">products</a>
-          <a href="" className="px-[40px]">
-            Market
-          </a>
-          <a href="">$AIG</a>
-        </div>
-
-        <div className="flex items-center relative" style={{ zIndex: 20 }}>
-          <ConnectButton.Custom>
-            {({ account, openConnectModal, mounted }) => {
-              return (
+        <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] h-screen ">
+          <div className="text-white pt-[76px] mb-[45px] ">
+            <h1 className="mb-[16px] text-center ">Stake More, Earn More</h1>
+            <p className="text-[#F9F9F999]  text-center  font-gasp">
+              Select from Silver, Golden, or Platinum plans and maximize your{" "}
+              <br /> returns with flexible durations.
+            </p>
+          </div>
+          <div className="flex justify-center gap-7 items-stretch">
+            {/* Mint Card */}
+            <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col whitespace-nowrap">
+              <figure className="mb-[32px] flex justify-center flex-col items-center ">
+                <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
+                  <img src={fff} alt="" className="  p-[17px] m-auto " />
+                </div>
+                <figcaption className="font-medium text-2xl mt-2">
+                  Minting
+                </figcaption>
+              </figure>
+              {/* Stablecoin selector and amount input */}
+              <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
+                <label className="text-sm mb-1">Stablecoin</label>
+                <Select value={stablecoin} onValueChange={setStablecoin}>
+                  <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
+                    <SelectValue placeholder="Select stablecoin" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
+                    <SelectItem value="USDT" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDT</SelectItem>
+                    <SelectItem value="USDC" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDC</SelectItem>
+                    <SelectItem value="DAI" className="hover:bg-[#23282a] cursor-pointer transition-colors">DAI</SelectItem>
+                  </SelectContent>
+                </Select>
+                <label className="text-sm mt-2 mb-1">Amount</label>
+                <Input
+                  className="bg-[#222] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888]"
+                  type="number"
+                  min="0"
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  placeholder="Enter amount"
+                />
+                <div className="text-xs mt-2">You will receive: <span className="font-bold">{aiqAmount || '0'} AIQ</span></div>
+              </div>
+              <div
+                className="mt-auto flex justify-center pb-1 mb-[21px]"
+                style={{ zIndex: 29 }}
+              >
                 <button
-                  className="whitespace-nowrap mr-[32px] border-white border font-medium bg-black rounded-xl py-2 px-7 shadows relative"
+                  className="whitespace-nowrap border one h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
                   style={{
                     background:
-                      "radial-gradient(circle at 85% -30%, rgba(255,255,255,0.3), transparent 30%)",
+                      "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
+                    opacity: loading ? 0.6 : 1,
+                    cursor: loading ? 'not-allowed' : 'pointer',
                   }}
-                  onClick={account ? disconnect : openConnectModal}
+                  onClick={handleMint}
+                  disabled={!isConnected || loading}
                 >
-                  {account
-                    ? `${account.displayName} (Disconnect)`
-                    : 'connect wallet'}
+                  {loading
+                    ? mintStep === 'approving'
+                      ? `Processing${dots}`
+                      : mintStep === 'confirming'
+                      ? `Confirm in wallet${dots}`
+                      : mintStep === 'minting'
+                      ? `Minting${dots}`
+                      : `Processing${dots}`
+                    : 'Mint'}
                 </button>
-              );
-            }}
-          </ConnectButton.Custom>
-          <div className="main-shadow"></div>
-          <div className="sub-shadow"></div>
-          <img src={search_icon} alt="" className="h-6 w-6" />
+              </div>
+            </div>
+            {/* Staking Card */}
+            <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col">
+              <figure className="mb-[32px] flex justify-center flex-col items-center ">
+                <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
+                  <img src={fff} alt="" className="p-[17px] m-auto " />
+                </div>
+                <figcaption className="font-medium text-2xl mt-2">Staking</figcaption>
+              </figure>
+              {/* Plan selector and amount input */}
+              <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
+                <label className="text-sm mb-1">Plan</label>
+                <Select value={stakePlan} onValueChange={setStakePlan}>
+                  <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
+                    <SelectValue placeholder="Select plan" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
+                    <SelectItem value="THREE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">3 Months (1%/mo)</SelectItem>
+                    <SelectItem value="SIX_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">6 Months (1.5%/mo)</SelectItem>
+                    <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">12 Months (2%/mo)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <label className="text-sm mt-2 mb-1">AIQ Amount</label>
+                <Input
+                  className="bg-[#222] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888]"
+                  type="number"
+                  min="0"
+                  value={stakeAmount}
+                  onChange={e => setStakeAmount(e.target.value)}
+                  placeholder="Enter AIQ amount"
+                />
+              </div>
+              <div
+                className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
+                style={{ zIndex: 29 }}
+              >
+                <button
+                  className="whitespace-nowrap border one h-[41px] w-[237px] bg-black mx-auto rounded-xl font-medium relative text-[16px]"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
+                    opacity: stakeLoading ? 0.6 : 1,
+                    cursor: stakeLoading ? 'not-allowed' : 'pointer',
+                  }}
+                  onClick={handleStake}
+                  disabled={!isConnected || stakeLoading}
+                >
+                  {stakeLoading
+                    ? stakeStep === 'approving'
+                      ? `Processing${dots}`
+                      : stakeStep === 'confirming'
+                      ? `Confirm in wallet${dots}`
+                      : stakeStep === 'staking'
+                      ? `Staking${dots}`
+                      : `Processing${dots}`
+                    : 'Stake'}
+                </button>
+              </div>
+            </div>
+            {/* Claim Rewards Card */}
+            <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col">
+              <figure className="mb-[32px] flex justify-center flex-col items-center ">
+                <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
+                  <img src={fff} alt="" className="p-[17px] m-auto " />
+                </div>
+                <figcaption className="font-medium text-2xl mt-2">Claim Rewards</figcaption>
+              </figure>
+              {/* Plan selector for claim */}
+              <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
+                <label className="text-sm mb-1">Plan</label>
+                <Select value={claimPlan} onValueChange={setClaimPlan}>
+                  <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
+                    <SelectValue placeholder="Select plan" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
+                    <SelectItem value="THREE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">3 Months</SelectItem>
+                    <SelectItem value="SIX_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">6 Months</SelectItem>
+                    <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">12 Months</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div
+                className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
+                style={{ zIndex: 29 }}
+              >
+                <button
+                  className="whitespace-nowrap border one h-[41px] w-[237px] bg-black mx-auto rounded-xl font-medium relative text-[16px]"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
+                    opacity: claimLoading ? 0.6 : 1,
+                    cursor: claimLoading ? 'not-allowed' : 'pointer',
+                  }}
+                  onClick={handleClaimRewards}
+                  disabled={!isConnected || claimLoading}
+                >
+                  {claimLoading
+                    ? claimStep === 'confirming'
+                      ? `Confirm in wallet${dots}`
+                      : claimStep === 'claiming'
+                      ? `Claiming${dots}`
+                      : `Processing${dots}`
+                    : 'Claim'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] h-screen ">
-        <div className="text-white pt-[76px] mb-[45px] ">
-          <h1 className="mb-[16px] text-center ">Stake More, Earn More</h1>
-          <p className="text-[#F9F9F999]  text-center  font-gasp">
-            Select from Silver, Golden, or Platinum plans and maximize your{" "}
-            <br /> returns with flexible durations.
-          </p>
-        </div>
-
-  <div className="flex justify-center gap-7 items-stretch">
-          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col whitespace-nowrap">
-            <figure className="mb-[32px] flex justify-center flex-col items-center ">
-              <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
-                <img src={fff} alt="" className="  p-[17px] m-auto " />
-              </div>
-              <figcaption className="font-medium text-2xl mt-2">
-                Minting
-              </figcaption>
-            </figure>
-
-            {/* Stablecoin selector and amount input */}
-            <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
-              <label className="text-sm mb-1">Stablecoin</label>
-              <select
-                className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-200 appearance-none shadow-lg hover:border-[#aaa] hover:bg-[#262626] cursor-pointer min-h-[44px]"
-                value={stablecoin}
-                onChange={e => setStablecoin(e.target.value)}
-                style={{
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none',
-                  appearance: 'none',
-                  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'16\' height=\'16\' fill=\'white\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'white\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E")',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.75rem center',
-                  paddingRight: '2.5rem',
-                  boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)',
-                }}
-              >
-                <option value="USDT">USDT</option>
-                <option value="USDC">USDC</option>
-                <option value="DAI">DAI</option>
-              </select>
-              <label className="text-sm mt-2 mb-1">Amount</label>
-              <input
-                className="bg-[#222] text-white rounded-lg px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888]"
-                type="number"
-                min="0"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                placeholder="Enter amount"
-              />
-              <div className="text-xs mt-2">You will receive: <span className="font-bold">{aiqAmount || '0'} AIQ</span></div>
-            </div>
-            <div
-              className="mt-auto flex justify-center pb-1 mb-[21px]"
-              style={{ zIndex: 29 }}
-            >
-              <button
-                className="whitespace-nowrap border one h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
-                style={{
-                  background:
-                    "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
-                  opacity: loading ? 0.6 : 1,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                }}
-                onClick={handleMint}
-                disabled={!isConnected || loading}
-              >
-                {loading
-                  ? mintStep === 'approving'
-                    ? 'Processing...'
-                    : mintStep === 'confirming'
-                    ? 'Confirm in wallet...'
-                    : mintStep === 'minting'
-                    ? 'Minting...'
-                    : 'Processing...'
-                  : 'Mint'}
-              </button>
-
-            </div>
-          </div>
-
-          {/* Staking Card */}
-          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col">
-            <figure className="mb-[32px] flex justify-center flex-col items-center ">
-              <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
-                <img src={fff} alt="" className="p-[17px] m-auto " />
-              </div>
-              <figcaption className="font-medium text-2xl mt-2">Staking</figcaption>
-            </figure>
-            {/* Plan selector and amount input */}
-            <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
-              <label className="text-sm mb-1">Plan</label>
-              <select
-                className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-200 appearance-none shadow-lg hover:border-[#aaa] hover:bg-[#262626] cursor-pointer min-h-[44px]"
-                value={stakePlan}
-                onChange={e => setStakePlan(e.target.value)}
-                style={{
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none',
-                  appearance: 'none',
-                  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'16\' height=\'16\' fill=\'white\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'white\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E")',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.75rem center',
-                  paddingRight: '2.5rem',
-                  boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)',
-                }}
-              >
-                <option value="THREE_MONTHS">3 Months (1%/mo)</option>
-                <option value="SIX_MONTHS">6 Months (1.5%/mo)</option>
-                <option value="TWELVE_MONTHS">12 Months (2%/mo)</option>
-              </select>
-              <label className="text-sm mt-2 mb-1">AIQ Amount</label>
-              <input
-                className="bg-[#222] text-white rounded-lg px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888]"
-                type="number"
-                min="0"
-                value={stakeAmount}
-                onChange={e => setStakeAmount(e.target.value)}
-                placeholder="Enter AIQ amount"
-              />
-            </div>
-            <div
-              className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
-              style={{ zIndex: 29 }}
-            >
-              <button
-                className="whitespace-nowrap border one h-[41px] w-[237px] bg-black mx-auto rounded-xl font-medium relative text-[16px]"
-                style={{
-                  background:
-                    "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
-                  opacity: stakeLoading ? 0.6 : 1,
-                  cursor: stakeLoading ? 'not-allowed' : 'pointer',
-                }}
-                onClick={handleStake}
-                disabled={!isConnected || stakeLoading}
-              >
-                {stakeLoading
-                  ? stakeStep === 'approving'
-                    ? 'Processing...'
-                    : stakeStep === 'confirming'
-                    ? 'Confirm in wallet...'
-                    : stakeStep === 'staking'
-                    ? 'Staking...'
-                    : 'Processing...'
-                  : 'Stake'}
-              </button>
-            </div>
-          </div>
-
-          {/* Claim Rewards Card */}
-          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col">
-            <figure className="mb-[32px] flex justify-center flex-col items-center ">
-              <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
-                <img src={fff} alt="" className="p-[17px] m-auto " />
-              </div>
-              <figcaption className="font-medium text-2xl mt-2">Claim Rewards</figcaption>
-            </figure>
-            {/* Plan selector for claim */}
-            <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
-              <label className="text-sm mb-1">Plan</label>
-              <select
-                className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-200 appearance-none shadow-lg hover:border-[#aaa] hover:bg-[#262626] cursor-pointer min-h-[44px]"
-                value={claimPlan}
-                onChange={e => setClaimPlan(e.target.value)}
-                style={{
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none',
-                  appearance: 'none',
-                  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'16\' height=\'16\' fill=\'white\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'white\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E")',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.75rem center',
-                  paddingRight: '2.5rem',
-                  boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)',
-                }}
-              >
-                <option value="THREE_MONTHS">3 Months</option>
-                <option value="SIX_MONTHS">6 Months</option>
-                <option value="TWELVE_MONTHS">12 Months</option>
-              </select>
-            </div>
-            <div
-              className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
-              style={{ zIndex: 29 }}
-            >
-              <button
-                className="whitespace-nowrap border one h-[41px] w-[237px] bg-black mx-auto rounded-xl font-medium relative text-[16px]"
-                style={{
-                  background:
-                    "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
-                  opacity: claimLoading ? 0.6 : 1,
-                  cursor: claimLoading ? 'not-allowed' : 'pointer',
-                }}
-                onClick={handleClaimRewards}
-                disabled={!isConnected || claimLoading}
-              >
-                {claimLoading
-                  ? claimStep === 'confirming'
-                    ? 'Confirm in wallet...'
-                    : claimStep === 'claiming'
-                    ? 'Claiming...'
-                    : 'Processing...'
-                  : 'Claim'}
-              </button>
-            </div>
-          </div>
-
-
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 
