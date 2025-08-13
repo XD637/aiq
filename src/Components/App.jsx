@@ -271,11 +271,7 @@ function App() {
         </div>
         <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] h-screen ">
           <div className="text-white pt-[76px] mb-[45px] ">
-            <h1 className="mb-[16px] text-center ">Mint More, Stake More, Claim More</h1>
-            <p className="text-[#F9F9F999]  text-center  font-gasp">
-              Select from Silver, Golden, or Platinum plans and maximize your{" "}
-              <br /> returns with flexible durations.
-            </p>
+            <h1 className="mb-[16px] text-center ">Mint, Stake and Earn</h1>
           </div>
           <div className="flex justify-center gap-7 items-stretch">
             {/* Mint Card */}
