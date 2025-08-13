@@ -23,12 +23,18 @@ function App() {
         </div>
 
         <div className="flex items-center">
-          <button className="whitespace-nowrap mr-[32px] font-medium bg-black rounded-xl py-2 px-7">
+          <button className="whitespace-nowrap mr-[32px] font-medium bg-black rounded-xl py-2 px-7 shadows"    
+     
+      >
             connect wallet{" "}
+            <div className="main-shadow"></div>
+            <div className="sub-shadow"></div>
           </button>
           <img src={search_icon} alt="" className="h-6 w-6" />
         </div>
       </div>
+
+    
 
       <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] h-screen ">
         <div className="text-white pt-[76px] mb-[45px] ">
@@ -39,8 +45,8 @@ function App() {
           </p>
         </div>
 
-        <div className="flex   whitespace-nowrap  ">
-          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full  ">
+        <div className="flex  justify-center gap-7 ">
+          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full  whitespace-nowrap  ">
             <figure className="mb-[32px] flex justify-center flex-col items-center ">
               <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
                 <img src={fff} alt="" className="  p-[17px] m-auto " />
@@ -87,10 +93,10 @@ function App() {
               </button>
             </div>
           </div>
-        </div>
+  
 
 
-          <div className="flex   whitespace-nowrap  ">
+        
           <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full  ">
             <figure className="mb-[32px] flex justify-center flex-col items-center ">
               <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
@@ -138,11 +144,11 @@ function App() {
               </button>
             </div>
           </div>
-        </div>
+      
 
 
-          <div className="flex   whitespace-nowrap  ">
-          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full  ">
+          
+          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full   whitespace-nowrap ">
             <figure className="mb-[32px] flex justify-center flex-col items-center ">
               <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
                 <img src={fff} alt="" className="  p-[17px] m-auto " />
