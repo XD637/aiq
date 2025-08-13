@@ -3,6 +3,7 @@ import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 import { Input } from './ui/input';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { Copy } from 'lucide-react';
 import { ethers } from 'ethers';
 import { Toaster } from './ui/sonner';
 import { notifySuccess, notifyError } from '../lib/notify';
@@ -14,6 +15,16 @@ import claim from  '../assets/claim.svg'
 
 
 function App() {
+  // Copy address state for ConnectButton
+  const [copied, setCopied] = React.useState(false);
+  const handleCopy = (address) => (e) => {
+    e.stopPropagation();
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    }
+  };
   // Wallet/account hooks (must be declared before use)
   const { isConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
@@ -263,22 +274,33 @@ function App() {
           </div>
           <div className="flex items-center relative" style={{ zIndex: 20 }}>
             <ConnectButton.Custom>
-              {({ account, openConnectModal, mounted }) => {
-                return (
-                  <button
-                    className="whitespace-nowrap mr-[32px] border-white border font-medium bg-black rounded-xl py-2 px-7 shadows relative cursor-pointer"
-                    style={{
-                      background:
-                        "radial-gradient(circle at 85% -30%, rgba(255,255,255,0.3), transparent 30%)",
-                    }}
-                    onClick={account ? disconnect : openConnectModal}
-                  >
-                    {account
-                      ? `${account.displayName} (Disconnect)`
-                      : 'Connect Wallet'}
-                  </button>
-                );
-              }}
+              {({ account, openConnectModal, mounted }) => (
+                <button
+                  className="whitespace-nowrap mr-[32px] border-white border font-medium bg-black rounded-xl py-2 px-7 shadows relative cursor-pointer flex items-center gap-2"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 85% -30%, rgba(255,255,255,0.3), transparent 30%)",
+                  }}
+                  onClick={account ? disconnect : openConnectModal}
+                >
+                  {account ? (
+                    <>
+                      <span>{account.displayName}</span>
+                      <span
+                        title="Copy address"
+                        onClick={handleCopy(account.address)}
+                        className="ml-2 flex items-center cursor-pointer hover:text-blue-400"
+                      >
+                        <Copy size={18} />
+                        {copied && <span className="ml-1 text-xs text-green-400">Copied!</span>}
+                      </span>
+                      <span className="ml-2 text-xs text-[#aaa]">(Disconnect)</span>
+                    </>
+                  ) : (
+                    'Connect Wallet'
+                  )}
+                </button>
+              )}
             </ConnectButton.Custom>
             <div className="main-shadow"></div>
             <div className="sub-shadow"></div>
