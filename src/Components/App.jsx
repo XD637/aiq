@@ -231,9 +231,19 @@ function App() {
             <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
               <label className="text-sm mb-1">Stablecoin</label>
               <select
-                className="bg-[#222] text-white rounded px-2 py-1"
+                className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-200 appearance-none shadow-lg hover:border-[#aaa] hover:bg-[#262626] cursor-pointer min-h-[44px]"
                 value={stablecoin}
                 onChange={e => setStablecoin(e.target.value)}
+                style={{
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  appearance: 'none',
+                  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'16\' height=\'16\' fill=\'white\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'white\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E")',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.75rem center',
+                  paddingRight: '2.5rem',
+                  boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)',
+                }}
               >
                 <option value="USDT">USDT</option>
                 <option value="USDC">USDC</option>
@@ -241,7 +251,7 @@ function App() {
               </select>
               <label className="text-sm mt-2 mb-1">Amount</label>
               <input
-                className="bg-[#222] text-white rounded px-2 py-1"
+                className="bg-[#222] text-white rounded-lg px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888]"
                 type="number"
                 min="0"
                 value={amount}
@@ -291,9 +301,19 @@ function App() {
             <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
               <label className="text-sm mb-1">Plan</label>
               <select
-                className="bg-[#222] text-white rounded px-2 py-1"
+                className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-200 appearance-none shadow-lg hover:border-[#aaa] hover:bg-[#262626] cursor-pointer min-h-[44px]"
                 value={stakePlan}
                 onChange={e => setStakePlan(e.target.value)}
+                style={{
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  appearance: 'none',
+                  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'16\' height=\'16\' fill=\'white\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'white\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E")',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.75rem center',
+                  paddingRight: '2.5rem',
+                  boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)',
+                }}
               >
                 <option value="THREE_MONTHS">3 Months (1%/mo)</option>
                 <option value="SIX_MONTHS">6 Months (1.5%/mo)</option>
@@ -301,7 +321,7 @@ function App() {
               </select>
               <label className="text-sm mt-2 mb-1">AIQ Amount</label>
               <input
-                className="bg-[#222] text-white rounded px-2 py-1"
+                className="bg-[#222] text-white rounded-lg px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888]"
                 type="number"
                 min="0"
                 value={stakeAmount}
@@ -349,9 +369,19 @@ function App() {
             <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
               <label className="text-sm mb-1">Plan</label>
               <select
-                className="bg-[#222] text-white rounded px-2 py-1"
+                className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white focus:outline-none focus:ring-0 focus:border-white transition-all duration-200 appearance-none shadow-lg hover:border-[#aaa] hover:bg-[#262626] cursor-pointer min-h-[44px]"
                 value={claimPlan}
                 onChange={e => setClaimPlan(e.target.value)}
+                style={{
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  appearance: 'none',
+                  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'16\' height=\'16\' fill=\'white\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M4 6l4 4 4-4\' stroke=\'white\' stroke-width=\'2\' fill=\'none\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E")',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.75rem center',
+                  paddingRight: '2.5rem',
+                  boxShadow: '0 2px 12px 0 rgba(0,0,0,0.10)',
+                }}
               >
                 <option value="THREE_MONTHS">3 Months</option>
                 <option value="SIX_MONTHS">6 Months</option>
@@ -379,7 +409,7 @@ function App() {
                     : claimStep === 'claiming'
                     ? 'Claiming...'
                     : 'Processing...'
-                  : 'Claim Rewards'}
+                  : 'Claim'}
               </button>
             </div>
           </div>
