@@ -1,10 +1,8 @@
-import "./App.css";
-import search_icon from "./assets/search_icon.png";
-import AIQ_logo from "./assets/AIQ_logo.png";
-import fff from "./assets/MintIcon.png";
-// import './index.css'
-import i_icon from './assets/i_icon.svg'
-
+import "../App.css";
+import search_icon from "../assets/search_icon.png";
+import AIQ_logo from "../assets/AIQ_logo.png";
+import fff from "../assets/MintIcon.png";
+import i_icon from "../assets/i_icon.svg";
 
 function App() {
   return (
@@ -22,19 +20,21 @@ function App() {
           <a href="">$AIG</a>
         </div>
 
-        <div className="flex items-center">
-          <button className="whitespace-nowrap mr-[32px] font-medium bg-black rounded-xl py-2 px-7 shadows"    
-     
-      >
+        <div className="flex items-center relative" style={{ zIndex: 20 }}>
+          <button
+            className="whitespace-nowrap mr-[32px] border-white border font-medium bg-black rounded-xl py-2 px-7 shadows relative"
+            style={{
+              background:
+                "radial-gradient(circle at 85% -30%, rgba(255,255,255,0.3), transparent 30%)",
+            }}
+          >
             connect wallet{" "}
-            <div className="main-shadow"></div>
-            <div className="sub-shadow"></div>
           </button>
+          <div className="main-shadow"></div>
+          <div className="sub-shadow"></div>
           <img src={search_icon} alt="" className="h-6 w-6" />
         </div>
       </div>
-
-    
 
       <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] h-screen ">
         <div className="text-white pt-[76px] mb-[45px] ">
@@ -63,7 +63,14 @@ function App() {
 
             <div className=" bg-[#191919]  mx-[18px] mt-[12px] rounded-[5px]  pl-[14px] pr-[26px]">
               <div className="flex justify-between gap-0.5 border-b border-b-[#FFFFFF40]  py-[9px] ">
-                <span className="flex justify-center items-center ">APO <img src={i_icon} alt="i icon " className="w-[12px] h-3 ml-1" /></span>
+                <span className="flex justify-center items-center ">
+                  APO{" "}
+                  <img
+                    src={i_icon}
+                    alt="i icon "
+                    className="w-[12px] h-3 ml-1"
+                  />
+                </span>
                 <p>01%</p>
               </div>
 
@@ -93,10 +100,7 @@ function App() {
               </button>
             </div>
           </div>
-  
 
-
-        
           <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full  ">
             <figure className="mb-[32px] flex justify-center flex-col items-center ">
               <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
@@ -114,7 +118,14 @@ function App() {
 
             <div className=" bg-[#191919]  mx-[18px] mt-[12px] rounded-[5px]  pl-[14px] pr-[26px]">
               <div className="flex justify-between gap-0.5 border-b border-b-[#FFFFFF40]  py-[9px] ">
-                <span className="flex justify-center items-center ">APO <img src={i_icon} alt="i icon " className="w-[12px] h-3 ml-1" /></span>
+                <span className="flex justify-center items-center ">
+                  APO{" "}
+                  <img
+                    src={i_icon}
+                    alt="i icon "
+                    className="w-[12px] h-3 ml-1"
+                  />
+                </span>
                 <p>01%</p>
               </div>
 
@@ -144,10 +155,7 @@ function App() {
               </button>
             </div>
           </div>
-      
 
-
-          
           <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full   whitespace-nowrap ">
             <figure className="mb-[32px] flex justify-center flex-col items-center ">
               <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
@@ -165,7 +173,14 @@ function App() {
 
             <div className=" bg-[#191919]  mx-[18px] mt-[12px] rounded-[5px]  pl-[14px] pr-[26px]">
               <div className="flex justify-between gap-0.5 border-b border-b-[#FFFFFF40]  py-[9px] ">
-                <span className="flex justify-center items-center ">APO <img src={i_icon} alt="i icon " className="w-[12px] h-3 ml-1" /></span>
+                <span className="flex justify-center items-center ">
+                  APO{" "}
+                  <img
+                    src={i_icon}
+                    alt="i icon "
+                    className="w-[12px] h-3 ml-1"
+                  />
+                </span>
                 <p>01%</p>
               </div>
 
@@ -196,8 +211,6 @@ function App() {
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
   );
