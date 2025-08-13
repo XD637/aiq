@@ -9,7 +9,7 @@ import { notifySuccess, notifyError } from '../lib/notify';
 import AIQ_logo from '../assets/AIQ_logo.png';
 import search_icon from '../assets/search_icon.png';
 import fff from '../assets/MintIcon.png';
-import i_icon from '../assets/i_icon.svg';
+
 
 function App() {
 
