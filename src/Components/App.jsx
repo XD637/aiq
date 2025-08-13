@@ -9,7 +9,8 @@ import { notifySuccess, notifyError } from '../lib/notify';
 import AIQ_logo from '../assets/AIQ_logo.png';
 import search_icon from '../assets/search_icon.png';
 import fff from '../assets/MintIcon.png';
-
+import staking_icon from  '../assets/staking_icon.svg'
+import claim from  '../assets/claim.svg'
 
 
 function App() {
@@ -235,8 +236,8 @@ function App() {
           className: 'font-medium',
         }}
       />
-      <div className="h-screen">
-        <div className="flex justify-between items-center bg-[#131313] px-[120px] py-[14px] text-white font-[Haas_Grot_Disp_Trial]">
+      <div className="min-h-screen flex flex-col">
+        <div className="flex justify-between items-center bg-[#131313] px-[120px] py-[14px] text-white font-[Haas_Grot_Disp_Trial] flex-shrink-0">
           <div>
             <img src={AIQ_logo} alt="AiQ logo" />
           </div>
@@ -269,14 +270,14 @@ function App() {
             <img src={search_icon} alt="" className="h-6 w-6" />
           </div>
         </div>
-        <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] h-screen ">
-          <div className="text-white pt-[76px] mb-[45px] ">
-            <h1 className="mb-[16px] text-center ">Mint, Stake and Earn</h1>
+  <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] flex-1 flex flex-col justify-center">
+          <div className="text-white pt-8 mb-4">
+            <h1 className="mb-2 text-center ">Mint, Stake and Earn</h1>
           </div>
-          <div className="flex justify-center gap-7 items-stretch">
+          <div className="flex justify-center gap-4 items-stretch">
             {/* Mint Card */}
-            <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col whitespace-nowrap">
-              <figure className="mb-[32px] flex justify-center flex-col items-center ">
+            <div className="bg-[#141414] text-white rounded-2xl pt-4 max-w-[344px] w-full flex flex-col whitespace-nowrap">
+              <figure className="mb-4 flex justify-center flex-col items-center ">
                 <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
                   <img src={fff} alt="" className="  p-[17px] m-auto " />
                 </div>
@@ -285,19 +286,19 @@ function App() {
                 </figcaption>
               </figure>
               {/* Stablecoin selector and amount input */}
-              <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
+              <div className="flex flex-col gap-1 px-4 pb-2 flex-grow">
                 <label className="text-sm mb-1">Stablecoin</label>
                   <Select value={stablecoin} onValueChange={setStablecoin}>
                     <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
                       <SelectValue placeholder="Select stablecoin" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
-                      <SelectItem value="USDT" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDT</SelectItem>
-                      <SelectItem value="USDC" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDC</SelectItem>
-                      <SelectItem value="DAI" className="hover:bg-[#23282a] cursor-pointer transition-colors">DAI</SelectItem>
+                      <SelectItem value="USDT" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">USDT</SelectItem>
+                      <SelectItem value="USDC" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">USDC</SelectItem>
+                      <SelectItem value="DAI" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">DAI</SelectItem>
                     </SelectContent>
                   </Select>
-                  <div className="text-xs text-[#aaa] mt-1 mb-1">Your {stablecoin} balance: <span className="font-bold text-white">{stablecoinBalance !== '' ? stablecoinBalance : '--'}</span></div>
+                  <div className="text-xs text-[#aaa] mt-1 mb-1">{stablecoin} balance: <span className="font-bold text-white">{stablecoinBalance !== '' ? stablecoinBalance : '--'}</span></div>
                 <label className="text-sm mt-2 mb-1">Amount</label>
                 <Input
                   className="bg-[#222] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&[type=number]]:appearance-none"
@@ -308,10 +309,10 @@ function App() {
                   placeholder="Enter amount"
                   inputMode="decimal"
                 />
-                <div className="text-xs mt-2">You will receive: <span className="font-bold">{aiqAmount || '0'} AIQ</span></div>
+                  <div className="text-xs text-[#aaa] mb-1">AIQ balance: <span className="font-bold text-white">{aiqBalance !== '' ? aiqBalance : '--'}</span></div>
               </div>
               <div
-                className="mt-auto flex justify-center pb-1 mb-[21px]"
+                className="mt-auto flex justify-center pb-1 mb-4"
                 style={{ zIndex: 29 }}
               >
                 <button
@@ -338,26 +339,27 @@ function App() {
               </div>
             </div>
             {/* Staking Card */}
-            <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col">
-              <figure className="mb-[32px] flex justify-center flex-col items-center ">
+            <div className="bg-[#141414] text-white rounded-2xl pt-4 max-w-[344px] min-h-[344px] w-full flex flex-col justify-between">
+              <figure className="mb-4 flex justify-center flex-col items-center ">
                 <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
-                  <img src={fff} alt="" className="p-[17px] m-auto " />
+                  <img src={staking_icon} alt="" className="p-[17px] m-auto " />
                 </div>
                 <figcaption className="font-medium text-2xl mt-2">Staking</figcaption>
               </figure>
               {/* Plan selector and amount input */}
-              <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
-                <label className="text-sm mb-1">Subscribe Plan</label>
+              <div className="flex flex-col gap-1 px-4 pb-2 flex-grow">
+                <label className="text-sm mb-1">Choose Plan</label>
                 <Select value={stakePlan} onValueChange={setStakePlan}>
                   <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
                     <SelectValue placeholder="Select plan" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
-                    <SelectItem value="THREE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">3 Months (1%/mo)</SelectItem>
-                    <SelectItem value="SIX_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">6 Months (1.5%/mo)</SelectItem>
-                    <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">12 Months (2%/mo)</SelectItem>
+                    <SelectItem value="THREE_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">3 Months (1%/mo)</SelectItem>
+                    <SelectItem value="SIX_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">6 Months (1.5%/mo)</SelectItem>
+                    <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">12 Months (2%/mo)</SelectItem>
                   </SelectContent>
                 </Select>
+                <div className="text-xs text-[#aaa] mt-1 mb-1">AIQ balance: <span className="font-bold text-white">{aiqBalance !== '' ? aiqBalance : '--'}</span></div>
                 <label className="text-sm mt-2 mb-1">AIQ Amount</label>
                 <Input
                   className="bg-[#222] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&[type=number]]:appearance-none"
@@ -368,10 +370,9 @@ function App() {
                   placeholder="Enter AIQ amount"
                   inputMode="decimal"
                 />
-                <div className="text-xs text-[#aaa] mt-1 mb-1">Your AIQ balance: <span className="font-bold text-white">{aiqBalance !== '' ? aiqBalance : '--'}</span></div>
               </div>
               <div
-                className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
+                className="mt-auto flex flex-col items-center pb-1 mb-4"
                 style={{ zIndex: 29 }}
               >
                 <button
@@ -398,40 +399,36 @@ function App() {
               </div>
             </div>
             {/* Claim Rewards Card */}
-            <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col">
-              <figure className="mb-[32px] flex justify-center flex-col items-center ">
+            <div className="bg-[#141414] text-white rounded-2xl pt-4 max-w-[344px] w-full flex flex-col">
+              <figure className="mb-4 flex justify-center flex-col items-center ">
                 <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
-                  <img src={fff} alt="" className="p-[17px] m-auto " />
+                  <img src={claim} alt="" className="p-[17px] m-auto " />
                 </div>
                 <figcaption className="font-medium text-2xl mt-2">Claim Rewards</figcaption>
               </figure>
-              {/* Stablecoin selector and plan selector for claim */}
-              <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
-                  <label className="text-sm mb-1">Stablecoin</label>
-                  <Select value={stablecoin} onValueChange={setStablecoin}>
-                    <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
-                      <SelectValue placeholder="Select stablecoin" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
-                      <SelectItem value="USDT" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDT</SelectItem>
-                      <SelectItem value="USDC" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDC</SelectItem>
-                      <SelectItem value="DAI" className="hover:bg-[#23282a] cursor-pointer transition-colors">DAI</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <label className="text-sm mt-2 mb-1">Subscribed Plan</label>
-                  <Select value={claimPlan} onValueChange={setClaimPlan}>
-                    <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
-                      <SelectValue placeholder="Select plan" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
-                      <SelectItem value="THREE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">3 Months</SelectItem>
-                      <SelectItem value="SIX_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">6 Months</SelectItem>
-                      <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">12 Months</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Plan selector for claim and reward display */}
+              <div className="flex flex-col gap-1 px-4 pb-2 flex-grow">
+                <label className="text-sm mb-1">Subscribed Plan</label>
+                <Select value={claimPlan} onValueChange={setClaimPlan}>
+                  <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
+                    <SelectValue placeholder="Select plan" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
+                    <SelectItem value="THREE_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">3 Months</SelectItem>
+                    <SelectItem value="SIX_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">6 Months</SelectItem>
+                    <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">12 Months</SelectItem>
+                  </SelectContent>
+                </Select>
+                {/* Rewards box (AIQ) */}
+                <div className="mt-10 mb-1">
+                  <div className="text-sm pb-1 text-white mb-1 text-left">Rewards</div>
+                  <div className="rounded-xl bg-[#222] border border-[#333] text-center min-h-[44px] flex flex-col justify-center items-center px-4 py-2">
+                    <div className="text-xs font-bold text-white mt-1">-- AIQ</div>
+                  </div>
                 </div>
+              </div>
               <div
-                className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
+                className="mt-auto flex flex-col items-center pb-1 mb-4"
                 style={{ zIndex: 29 }}
               >
                 <button
