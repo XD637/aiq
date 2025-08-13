@@ -30,32 +30,33 @@ function App() {
   const [amount, setAmount] = React.useState('');
 
   // Fetch balances when wallet or selected token changes
-  React.useEffect(() => {
-    async function fetchBalances() {
-      if (!isConnected || !window.ethereum || !address) {
-        setStablecoinBalance('');
-        setAiqBalance('');
-        return;
-      }
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        // Stablecoin balance
-        const token = stablecoins[stablecoin];
-        const erc20 = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
-        const bal = await erc20.balanceOf(address);
-        const decimals = token.decimals;
-        setStablecoinBalance(Number(ethers.formatUnits(bal, decimals)).toLocaleString());
-        // AIQ balance
-        const aiq = new ethers.Contract(aiqTokenAddress, ["function balanceOf(address) view returns (uint256)"], provider);
-        const aiqBal = await aiq.balanceOf(address);
-        setAiqBalance(Number(ethers.formatUnits(aiqBal, 18)).toLocaleString());
-      } catch {
-        setStablecoinBalance('');
-        setAiqBalance('');
-      }
+  const fetchBalances = React.useCallback(async () => {
+    if (!isConnected || !window.ethereum || !address) {
+      setStablecoinBalance('');
+      setAiqBalance('');
+      return;
     }
-    fetchBalances();
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      // Stablecoin balance
+      const token = stablecoins[stablecoin];
+      const erc20 = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
+      const bal = await erc20.balanceOf(address);
+      const decimals = token.decimals;
+      setStablecoinBalance(Number(ethers.formatUnits(bal, decimals)).toLocaleString());
+      // AIQ balance
+      const aiq = new ethers.Contract(aiqTokenAddress, ["function balanceOf(address) view returns (uint256)"], provider);
+      const aiqBal = await aiq.balanceOf(address);
+      setAiqBalance(Number(ethers.formatUnits(aiqBal, 18)).toLocaleString());
+    } catch {
+      setStablecoinBalance('');
+      setAiqBalance('');
+    }
   }, [isConnected, address, stablecoin]);
+
+  React.useEffect(() => {
+    fetchBalances();
+  }, [isConnected, address, stablecoin, fetchBalances]);
 
   // Staking states
   const [stakeAmount, setStakeAmount] = React.useState('');
@@ -92,7 +93,10 @@ function App() {
   };
   const mintingAddress = '0x25F9435F4439DD798C71fB202174a05fa4D8d3b5';
   const mintingAbi = ["function exchange(address stablecoin, uint256 stablecoinAmount) external"];
-  const erc20Abi = ["function approve(address spender, uint256 amount) external returns (bool)"];
+  const erc20Abi = [
+    "function approve(address spender, uint256 amount) external returns (bool)",
+    "function allowance(address owner, address spender) view returns (uint256)"
+  ];
 
   // Staking contract
   const stakingAddress = '0xD77fC167E8f047927ddf62BE32EB39dF3C1d87d4';
@@ -127,11 +131,15 @@ function App() {
       const parsedAmount = ethers.parseUnits(amount, token.decimals);
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      // Approve selected stablecoin for minting contract (wait for confirmation before proceeding)
       const tokenContract = new ethers.Contract(token.address, erc20Abi, signer);
-      const approveTx = await tokenContract.approve(mintingAddress, parsedAmount);
-      setMintStep('confirming');
-      await approveTx.wait();
+      // Check allowance
+      const allowance = await tokenContract.allowance(address, mintingAddress);
+      const maxUint = ethers.MaxUint256;
+      if (allowance < parsedAmount) {
+        const approveTx = await tokenContract.approve(mintingAddress, maxUint);
+        setMintStep('confirming');
+        await approveTx.wait();
+      }
       setMintStep('minting');
       // After approval, call minting contract
       const minting = new ethers.Contract(mintingAddress, mintingAbi, signer);
@@ -139,11 +147,12 @@ function App() {
       await tx.wait();
       setLoading(false);
       setMintStep('idle');
-  notifySuccess('Mint successful!');
+      notifySuccess(<span>Mint successful! <a href={`https://holesky.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-400">View on Etherscan</a></span>);
+      fetchBalances();
     } catch (err) {
       setLoading(false);
       setMintStep('idle');
-  notifyError('Mint failed: ' + (err?.message || err));
+      notifyError('Mint failed: ' + (err?.message || err));
     }
   };
 
@@ -174,11 +183,15 @@ function App() {
       const parsedAmount = ethers.parseUnits(stakeAmount, 18);
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      // Approve staking contract to spend AIQ
       const aiqToken = new ethers.Contract(aiqTokenAddress, erc20Abi, signer);
-      const approveTx = await aiqToken.approve(stakingAddress, parsedAmount);
-      setStakeStep('confirming');
-      await approveTx.wait();
+      // Check allowance
+      const allowance = await aiqToken.allowance(address, stakingAddress);
+      const maxUint = ethers.MaxUint256;
+      if (allowance < parsedAmount) {
+        const approveTx = await aiqToken.approve(stakingAddress, maxUint);
+        setStakeStep('confirming');
+        await approveTx.wait();
+      }
       setStakeStep('staking');
       // Stake
       const staking = new ethers.Contract(stakingAddress, stakingAbi, signer);
@@ -186,11 +199,12 @@ function App() {
       await tx.wait();
       setStakeLoading(false);
       setStakeStep('idle');
-  notifySuccess('Stake successful!');
+      notifySuccess(<span>Stake successful! <a href={`https://holesky.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-400">View on Etherscan</a></span>);
+      fetchBalances();
     } catch (err) {
       setStakeLoading(false);
       setStakeStep('idle');
-  notifyError('Stake failed: ' + (err?.message || err));
+      notifyError('Stake failed: ' + (err?.message || err));
     }
   };
 
@@ -215,11 +229,12 @@ function App() {
       await tx.wait();
       setClaimLoading(false);
       setClaimStep('idle');
-  notifySuccess('Claim successful!');
+  notifySuccess(<span>Claim successful! <a href={`https://holesky.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-400">View on Etherscan</a></span>);
+  fetchBalances();
     } catch (err) {
       setClaimLoading(false);
       setClaimStep('idle');
-  notifyError('Claim failed: ' + (err?.message || err));
+      notifyError('Claim failed: ' + (err?.message || err));
     }
   };
 
@@ -330,7 +345,7 @@ function App() {
                     ? mintStep === 'approving'
                       ? `Processing${dots}`
                       : mintStep === 'confirming'
-                      ? `Confirm in wallet${dots}`
+                      ? `Processing${dots}`
                       : mintStep === 'minting'
                       ? `Minting${dots}`
                       : `Processing${dots}`
@@ -390,7 +405,7 @@ function App() {
                     ? stakeStep === 'approving'
                       ? `Processing${dots}`
                       : stakeStep === 'confirming'
-                      ? `Confirm in wallet${dots}`
+                      ? `Processing${dots}`
                       : stakeStep === 'staking'
                       ? `Staking${dots}`
                       : `Processing${dots}`
@@ -419,13 +434,6 @@ function App() {
                     <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">12 Months</SelectItem>
                   </SelectContent>
                 </Select>
-                {/* Rewards box (AIQ) */}
-                <div className="mt-10 mb-1">
-                  <div className="text-sm pb-1 text-white mb-1 text-left">Rewards</div>
-                  <div className="rounded-xl bg-[#222] border border-[#333] text-center min-h-[44px] flex flex-col justify-center items-center px-4 py-2">
-                    <div className="text-xs font-bold text-white mt-1">-- AIQ</div>
-                  </div>
-                </div>
               </div>
               <div
                 className="mt-auto flex flex-col items-center pb-1 mb-4"
@@ -444,7 +452,7 @@ function App() {
                 >
                   {claimLoading
                     ? claimStep === 'confirming'
-                      ? `Confirm in wallet${dots}`
+                      ? `Processing${dots}`
                       : claimStep === 'claiming'
                       ? `Claiming${dots}`
                       : `Processing${dots}`

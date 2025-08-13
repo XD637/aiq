@@ -11,7 +11,7 @@ import AllRoutes from './AllRoutes.jsx';
 
 const config = getDefaultConfig({
   appName: 'AIQ',
-  projectId: 'Y3cd19782d9dd467ddb5513e7442471b6', // Replace with your WalletConnect Project ID
+  projectId: 'Y3cd19782d9dd467ddb5513e7442471b6',
   chains: [mainnet, polygon, optimism, arbitrum, base],
   ssr: false,
 });
