@@ -8,13 +8,25 @@ import fff from '../assets/MintIcon.png';
 import i_icon from '../assets/i_icon.svg';
 
 function App() {
+  // Mint states
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
+  const [mintStep, setMintStep] = React.useState('idle'); // idle | approving | confirming | minting
   const { isConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: walletClient } = useWalletClient();
   const [stablecoin, setStablecoin] = React.useState('USDT');
   const [amount, setAmount] = React.useState('');
+
+  // Staking states
+  const [stakeAmount, setStakeAmount] = React.useState('');
+  const [stakePlan, setStakePlan] = React.useState('THREE_MONTHS');
+  const [stakeLoading, setStakeLoading] = React.useState(false);
+  const [stakeStep, setStakeStep] = React.useState('idle'); // idle | approving | confirming | staking
+
+  // Claim rewards states
+  const [claimPlan, setClaimPlan] = React.useState('THREE_MONTHS');
+  const [claimLoading, setClaimLoading] = React.useState(false);
+  const [claimStep, setClaimStep] = React.useState('idle'); // idle | confirming | claiming
 
   // Stablecoin addresses and decimals
   const stablecoins = {
@@ -26,22 +38,34 @@ function App() {
   const mintingAbi = ["function exchange(address stablecoin, uint256 stablecoinAmount) external"];
   const erc20Abi = ["function approve(address spender, uint256 amount) external returns (bool)"];
 
+  // Staking contract
+  const stakingAddress = '0xD77fC167E8f047927ddf62BE32EB39dF3C1d87d4';
+  const aiqTokenAddress = '0xE2A08540C244434a1afd19A7ff2B38f284B3458B';
+  const stakingAbi = [
+    "function stake(uint256 amount, uint8 plan) external",
+    "function claimRewards(uint8 plan) external"
+  ];
+
   // Calculate AIQ to receive
   let aiqAmount = '';
   if (amount && !isNaN(amount)) {
     aiqAmount = (parseFloat(amount) / 100).toString();
   }
   const handleMint = async () => {
-    setError('');
+    if (!isConnected) {
+      alert('Please connect your wallet first.');
+      return;
+    }
     if (!window.ethereum) {
-      setError('No wallet found!');
+      alert('No wallet found!');
       return;
     }
     if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-      setError('Enter a valid amount');
+      alert('Enter a valid amount');
       return;
     }
     setLoading(true);
+    setMintStep('approving');
     try {
       const token = stablecoins[stablecoin];
       const parsedAmount = ethers.parseUnits(amount, token.decimals);
@@ -50,17 +74,96 @@ function App() {
       // Approve selected stablecoin for minting contract (wait for confirmation before proceeding)
       const tokenContract = new ethers.Contract(token.address, erc20Abi, signer);
       const approveTx = await tokenContract.approve(mintingAddress, parsedAmount);
+      setMintStep('confirming');
       await approveTx.wait();
+      setMintStep('minting');
       // After approval, call minting contract
       const minting = new ethers.Contract(mintingAddress, mintingAbi, signer);
       const tx = await minting.exchange(token.address, parsedAmount);
       await tx.wait();
       setLoading(false);
-      setError('');
+      setMintStep('idle');
       alert('Mint successful!');
     } catch (err) {
       setLoading(false);
-      setError('Mint failed: ' + (err?.message || err));
+      setMintStep('idle');
+      alert('Mint failed: ' + (err?.message || err));
+    }
+  };
+
+  // Plan mapping for contract
+  const planMap = {
+    'THREE_MONTHS': 0,
+    'SIX_MONTHS': 1,
+    'TWELVE_MONTHS': 2
+  };
+
+  // Stake handler
+  const handleStake = async () => {
+    if (!isConnected) {
+      alert('Please connect your wallet first.');
+      return;
+    }
+    if (!window.ethereum) {
+      alert('No wallet found!');
+      return;
+    }
+    if (!stakeAmount || isNaN(stakeAmount) || parseFloat(stakeAmount) <= 0) {
+      alert('Enter a valid AIQ amount');
+      return;
+    }
+    setStakeLoading(true);
+    setStakeStep('approving');
+    try {
+      const parsedAmount = ethers.parseUnits(stakeAmount, 18);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      // Approve staking contract to spend AIQ
+      const aiqToken = new ethers.Contract(aiqTokenAddress, erc20Abi, signer);
+      const approveTx = await aiqToken.approve(stakingAddress, parsedAmount);
+      setStakeStep('confirming');
+      await approveTx.wait();
+      setStakeStep('staking');
+      // Stake
+      const staking = new ethers.Contract(stakingAddress, stakingAbi, signer);
+      const tx = await staking.stake(parsedAmount, planMap[stakePlan]);
+      await tx.wait();
+      setStakeLoading(false);
+      setStakeStep('idle');
+      alert('Stake successful!');
+    } catch (err) {
+      setStakeLoading(false);
+      setStakeStep('idle');
+      alert('Stake failed: ' + (err?.message || err));
+    }
+  };
+
+  // Claim rewards handler
+  const handleClaimRewards = async () => {
+    if (!isConnected) {
+      alert('Please connect your wallet first.');
+      return;
+    }
+    if (!window.ethereum) {
+      alert('No wallet found!');
+      return;
+    }
+    setClaimLoading(true);
+    setClaimStep('confirming');
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const staking = new ethers.Contract(stakingAddress, stakingAbi, signer);
+      const tx = await staking.claimRewards(planMap[claimPlan]);
+      setClaimStep('claiming');
+      await tx.wait();
+      setClaimLoading(false);
+      setClaimStep('idle');
+      alert('Claim successful!');
+    } catch (err) {
+      setClaimLoading(false);
+      setClaimStep('idle');
+      alert('Claim failed: ' + (err?.message || err));
     }
   };
 
@@ -113,8 +216,8 @@ function App() {
           </p>
         </div>
 
-        <div className="flex  justify-center gap-7 ">
-          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full  whitespace-nowrap  ">
+  <div className="flex justify-center gap-7 items-stretch">
+          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col whitespace-nowrap">
             <figure className="mb-[32px] flex justify-center flex-col items-center ">
               <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
                 <img src={fff} alt="" className="  p-[17px] m-auto " />
@@ -125,7 +228,7 @@ function App() {
             </figure>
 
             {/* Stablecoin selector and amount input */}
-            <div className="flex flex-col gap-2 px-6 pb-2">
+            <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
               <label className="text-sm mb-1">Stablecoin</label>
               <select
                 className="bg-[#222] text-white rounded px-2 py-1"
@@ -148,7 +251,7 @@ function App() {
               <div className="text-xs mt-2">You will receive: <span className="font-bold">{aiqAmount || '0'} AIQ</span></div>
             </div>
             <div
-              className="mt-[32px] flex justify-center pb-1 mb-[21px]  "
+              className="mt-auto flex justify-center pb-1 mb-[21px]"
               style={{ zIndex: 29 }}
             >
               <button
@@ -162,123 +265,126 @@ function App() {
                 onClick={handleMint}
                 disabled={!isConnected || loading}
               >
-                {loading ? 'Processing...' : 'Mint'}
+                {loading
+                  ? mintStep === 'approving'
+                    ? 'Processing...'
+                    : mintStep === 'confirming'
+                    ? 'Confirm in wallet...'
+                    : mintStep === 'minting'
+                    ? 'Minting...'
+                    : 'Processing...'
+                  : 'Mint'}
               </button>
-              {error && (
-                <div className="text-red-400 text-xs mt-2 text-center w-full break-words">{error}</div>
-              )}
+
             </div>
           </div>
 
-          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full  ">
+          {/* Staking Card */}
+          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col">
             <figure className="mb-[32px] flex justify-center flex-col items-center ">
-              <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
-                <img src={fff} alt="" className="  p-[17px] m-auto " />
+              <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
+                <img src={fff} alt="" className="p-[17px] m-auto " />
               </div>
-              <figcaption className="font-medium text-2xl mt-2">
-                Staking
-              </figcaption>
+              <figcaption className="font-medium text-2xl mt-2">Staking</figcaption>
             </figure>
-
-            <div className="flex justify-between pl-[33px] pr-[49px] ">
-              <span className="">USDT Balance:</span>
-              <p>100</p>
+            {/* Plan selector and amount input */}
+            <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
+              <label className="text-sm mb-1">Plan</label>
+              <select
+                className="bg-[#222] text-white rounded px-2 py-1"
+                value={stakePlan}
+                onChange={e => setStakePlan(e.target.value)}
+              >
+                <option value="THREE_MONTHS">3 Months (1%/mo)</option>
+                <option value="SIX_MONTHS">6 Months (1.5%/mo)</option>
+                <option value="TWELVE_MONTHS">12 Months (2%/mo)</option>
+              </select>
+              <label className="text-sm mt-2 mb-1">AIQ Amount</label>
+              <input
+                className="bg-[#222] text-white rounded px-2 py-1"
+                type="number"
+                min="0"
+                value={stakeAmount}
+                onChange={e => setStakeAmount(e.target.value)}
+                placeholder="Enter AIQ amount"
+              />
             </div>
-
-            <div className=" bg-[#191919]  mx-[18px] mt-[12px] rounded-[5px]  pl-[14px] pr-[26px]">
-              <div className="flex justify-between gap-0.5 border-b border-b-[#FFFFFF40]  py-[9px] ">
-                <span className="flex justify-center items-center ">
-                  APO{" "}
-                  <img
-                    src={i_icon}
-                    alt="i icon "
-                    className="w-[12px] h-3 ml-1"
-                  />
-                </span>
-                <p>01%</p>
-              </div>
-
-              <div className="flex  justify-between border-b border-b-[#FFFFFF40]  py-[9px] ">
-                <span className="">Ends on</span>
-                <p>20 Aug 2026</p>
-              </div>
-
-              <div className="flex  justify-between   py-[8px] ">
-                <span className="">Daily rewards</span>
-                <p>1,254.8 1 INCH</p>
-              </div>
-            </div>
-
             <div
-              className="mt-[32px] flex justify-center pb-1 mb-[21px]  "
+              className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
               style={{ zIndex: 29 }}
             >
               <button
-                className="whitespace-nowrap border one h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
+                className="whitespace-nowrap border one h-[41px] w-[237px] bg-black mx-auto rounded-xl font-medium relative text-[16px]"
                 style={{
                   background:
                     "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
+                  opacity: stakeLoading ? 0.6 : 1,
+                  cursor: stakeLoading ? 'not-allowed' : 'pointer',
                 }}
+                onClick={handleStake}
+                disabled={!isConnected || stakeLoading}
               >
-                Mint
+                {stakeLoading
+                  ? stakeStep === 'approving'
+                    ? 'Processing...'
+                    : stakeStep === 'confirming'
+                    ? 'Confirm in wallet...'
+                    : stakeStep === 'staking'
+                    ? 'Staking...'
+                    : 'Processing...'
+                  : 'Stake'}
               </button>
             </div>
           </div>
 
-          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full   whitespace-nowrap ">
+          {/* Claim Rewards Card */}
+          <div className="bg-[#141414] text-white rounded-2xl pt-[18px] max-w-[344px] w-full flex flex-col">
             <figure className="mb-[32px] flex justify-center flex-col items-center ">
-              <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
-                <img src={fff} alt="" className="  p-[17px] m-auto " />
+              <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
+                <img src={fff} alt="" className="p-[17px] m-auto " />
               </div>
-              <figcaption className="font-medium text-2xl mt-2">
-                Minting
-              </figcaption>
+              <figcaption className="font-medium text-2xl mt-2">Claim Rewards</figcaption>
             </figure>
-
-            <div className="flex justify-between pl-[33px] pr-[49px] ">
-              <span className="">USDT Balance:</span>
-              <p>100</p>
+            {/* Plan selector for claim */}
+            <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
+              <label className="text-sm mb-1">Plan</label>
+              <select
+                className="bg-[#222] text-white rounded px-2 py-1"
+                value={claimPlan}
+                onChange={e => setClaimPlan(e.target.value)}
+              >
+                <option value="THREE_MONTHS">3 Months</option>
+                <option value="SIX_MONTHS">6 Months</option>
+                <option value="TWELVE_MONTHS">12 Months</option>
+              </select>
             </div>
-
-            <div className=" bg-[#191919]  mx-[18px] mt-[12px] rounded-[5px]  pl-[14px] pr-[26px]">
-              <div className="flex justify-between gap-0.5 border-b border-b-[#FFFFFF40]  py-[9px] ">
-                <span className="flex justify-center items-center ">
-                  APO{" "}
-                  <img
-                    src={i_icon}
-                    alt="i icon "
-                    className="w-[12px] h-3 ml-1"
-                  />
-                </span>
-                <p>01%</p>
-              </div>
-
-              <div className="flex  justify-between border-b border-b-[#FFFFFF40]  py-[9px] ">
-                <span className="">Ends on</span>
-                <p>20 Aug 2026</p>
-              </div>
-
-              <div className="flex  justify-between   py-[8px] ">
-                <span className="">Daily rewards</span>
-                <p>1,254.8 1 INCH</p>
-              </div>
-            </div>
-
             <div
-              className="mt-[32px] flex justify-center pb-1 mb-[21px]  "
+              className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
               style={{ zIndex: 29 }}
             >
               <button
-                className="whitespace-nowrap border one h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
+                className="whitespace-nowrap border one h-[41px] w-[237px] bg-black mx-auto rounded-xl font-medium relative text-[16px]"
                 style={{
                   background:
                     "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
+                  opacity: claimLoading ? 0.6 : 1,
+                  cursor: claimLoading ? 'not-allowed' : 'pointer',
                 }}
+                onClick={handleClaimRewards}
+                disabled={!isConnected || claimLoading}
               >
-                Mint
+                {claimLoading
+                  ? claimStep === 'confirming'
+                    ? 'Confirm in wallet...'
+                    : claimStep === 'claiming'
+                    ? 'Claiming...'
+                    : 'Processing...'
+                  : 'Claim Rewards'}
               </button>
             </div>
           </div>
+
+
         </div>
       </div>
     </div>
