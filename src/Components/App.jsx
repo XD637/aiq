@@ -11,16 +11,50 @@ import search_icon from '../assets/search_icon.png';
 import fff from '../assets/MintIcon.png';
 
 
+
 function App() {
+  // Wallet/account hooks (must be declared before use)
+  const { isConnected, address } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { data: walletClient } = useWalletClient();
+
+  // User balances
+  const [stablecoinBalance, setStablecoinBalance] = React.useState('');
+  const [aiqBalance, setAiqBalance] = React.useState('');
 
   // Mint states
   const [loading, setLoading] = React.useState(false);
   const [mintStep, setMintStep] = React.useState('idle'); // idle | approving | confirming | minting
-  const { isConnected, address } = useAccount();
-  const { disconnect } = useDisconnect();
-  const { data: walletClient } = useWalletClient();
   const [stablecoin, setStablecoin] = React.useState('USDT');
   const [amount, setAmount] = React.useState('');
+
+  // Fetch balances when wallet or selected token changes
+  React.useEffect(() => {
+    async function fetchBalances() {
+      if (!isConnected || !window.ethereum || !address) {
+        setStablecoinBalance('');
+        setAiqBalance('');
+        return;
+      }
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        // Stablecoin balance
+        const token = stablecoins[stablecoin];
+        const erc20 = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
+        const bal = await erc20.balanceOf(address);
+        const decimals = token.decimals;
+        setStablecoinBalance(Number(ethers.formatUnits(bal, decimals)).toLocaleString());
+        // AIQ balance
+        const aiq = new ethers.Contract(aiqTokenAddress, ["function balanceOf(address) view returns (uint256)"], provider);
+        const aiqBal = await aiq.balanceOf(address);
+        setAiqBalance(Number(ethers.formatUnits(aiqBal, 18)).toLocaleString());
+      } catch {
+        setStablecoinBalance('');
+        setAiqBalance('');
+      }
+    }
+    fetchBalances();
+  }, [isConnected, address, stablecoin]);
 
   // Staking states
   const [stakeAmount, setStakeAmount] = React.useState('');
@@ -207,7 +241,7 @@ function App() {
             <img src={AIQ_logo} alt="AiQ logo" />
           </div>
           <div>
-            <a href="">products</a>
+            <a href="">Products</a>
             <a href="" className="px-[40px]">Market</a>
             <a href="">$AIG</a>
           </div>
@@ -225,7 +259,7 @@ function App() {
                   >
                     {account
                       ? `${account.displayName} (Disconnect)`
-                      : 'connect wallet'}
+                      : 'Connect Wallet'}
                   </button>
                 );
               }}
@@ -237,7 +271,7 @@ function App() {
         </div>
         <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] h-screen ">
           <div className="text-white pt-[76px] mb-[45px] ">
-            <h1 className="mb-[16px] text-center ">Stake More, Earn More</h1>
+            <h1 className="mb-[16px] text-center ">Mint More, Stake More, Claim More</h1>
             <p className="text-[#F9F9F999]  text-center  font-gasp">
               Select from Silver, Golden, or Platinum plans and maximize your{" "}
               <br /> returns with flexible durations.
@@ -257,24 +291,26 @@ function App() {
               {/* Stablecoin selector and amount input */}
               <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
                 <label className="text-sm mb-1">Stablecoin</label>
-                <Select value={stablecoin} onValueChange={setStablecoin}>
-                  <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
-                    <SelectValue placeholder="Select stablecoin" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
-                    <SelectItem value="USDT" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDT</SelectItem>
-                    <SelectItem value="USDC" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDC</SelectItem>
-                    <SelectItem value="DAI" className="hover:bg-[#23282a] cursor-pointer transition-colors">DAI</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <Select value={stablecoin} onValueChange={setStablecoin}>
+                    <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
+                      <SelectValue placeholder="Select stablecoin" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
+                      <SelectItem value="USDT" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDT</SelectItem>
+                      <SelectItem value="USDC" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDC</SelectItem>
+                      <SelectItem value="DAI" className="hover:bg-[#23282a] cursor-pointer transition-colors">DAI</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="text-xs text-[#aaa] mt-1 mb-1">Your {stablecoin} balance: <span className="font-bold text-white">{stablecoinBalance !== '' ? stablecoinBalance : '--'}</span></div>
                 <label className="text-sm mt-2 mb-1">Amount</label>
                 <Input
-                  className="bg-[#222] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888]"
+                  className="bg-[#222] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&[type=number]]:appearance-none"
                   type="number"
                   min="0"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
                   placeholder="Enter amount"
+                  inputMode="decimal"
                 />
                 <div className="text-xs mt-2">You will receive: <span className="font-bold">{aiqAmount || '0'} AIQ</span></div>
               </div>
@@ -315,7 +351,7 @@ function App() {
               </figure>
               {/* Plan selector and amount input */}
               <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
-                <label className="text-sm mb-1">Plan</label>
+                <label className="text-sm mb-1">Subscribe Plan</label>
                 <Select value={stakePlan} onValueChange={setStakePlan}>
                   <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
                     <SelectValue placeholder="Select plan" />
@@ -328,13 +364,15 @@ function App() {
                 </Select>
                 <label className="text-sm mt-2 mb-1">AIQ Amount</label>
                 <Input
-                  className="bg-[#222] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888]"
+                  className="bg-[#222] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&[type=number]]:appearance-none"
                   type="number"
                   min="0"
                   value={stakeAmount}
                   onChange={e => setStakeAmount(e.target.value)}
                   placeholder="Enter AIQ amount"
+                  inputMode="decimal"
                 />
+                <div className="text-xs text-[#aaa] mt-1 mb-1">Your AIQ balance: <span className="font-bold text-white">{aiqBalance !== '' ? aiqBalance : '--'}</span></div>
               </div>
               <div
                 className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
@@ -371,20 +409,31 @@ function App() {
                 </div>
                 <figcaption className="font-medium text-2xl mt-2">Claim Rewards</figcaption>
               </figure>
-              {/* Plan selector for claim */}
+              {/* Stablecoin selector and plan selector for claim */}
               <div className="flex flex-col gap-2 px-6 pb-2 flex-grow">
-                <label className="text-sm mb-1">Plan</label>
-                <Select value={claimPlan} onValueChange={setClaimPlan}>
-                  <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
-                    <SelectValue placeholder="Select plan" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
-                    <SelectItem value="THREE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">3 Months</SelectItem>
-                    <SelectItem value="SIX_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">6 Months</SelectItem>
-                    <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">12 Months</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <label className="text-sm mb-1">Stablecoin</label>
+                  <Select value={stablecoin} onValueChange={setStablecoin}>
+                    <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
+                      <SelectValue placeholder="Select stablecoin" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
+                      <SelectItem value="USDT" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDT</SelectItem>
+                      <SelectItem value="USDC" className="hover:bg-[#23282a] cursor-pointer transition-colors">USDC</SelectItem>
+                      <SelectItem value="DAI" className="hover:bg-[#23282a] cursor-pointer transition-colors">DAI</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <label className="text-sm mt-2 mb-1">Subscribed Plan</label>
+                  <Select value={claimPlan} onValueChange={setClaimPlan}>
+                    <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
+                      <SelectValue placeholder="Select plan" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
+                      <SelectItem value="THREE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">3 Months</SelectItem>
+                      <SelectItem value="SIX_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">6 Months</SelectItem>
+                      <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#23282a] cursor-pointer transition-colors">12 Months</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               <div
                 className="mt-auto flex flex-col items-center pb-1 mb-[21px]"
                 style={{ zIndex: 29 }}
