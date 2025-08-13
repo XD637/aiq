@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
-import { Input } from '../components/ui/input';
+import { Input } from './ui/input';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { ethers } from 'ethers';
 import { Toaster } from './ui/sonner';
