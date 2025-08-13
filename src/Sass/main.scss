@@ -1,0 +1,87 @@
+body {
+    // font-family:  gasp;
+    padding: 0;
+    margin: 0;
+}
+
+@font-face {
+    font-family: "gasp";
+    src: url("../../public/font-bold.otf") format("opentype");
+    /* font-weight: 500; */
+    font-style: normal;
+    //   font-display: swap;
+}
+
+@font-face {
+    font-family: "gasp2";
+    src: url("../../public/font-medium.otf") format("opentype");
+    /* font-weight: 500; */
+    font-style: normal;
+    //   font-display: swap;
+}
+
+@font-face {
+    font-family: "gasp3";
+    src: url("../../public/font-less.otf") format("opentype");
+    /* font-weight: 500; */
+    font-style: normal;
+    //   font-display: swap;
+}
+
+
+
+h1 {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 48px;
+    letter-spacing: 1px;
+    font-family: "gasp";
+}
+
+p {
+    font-family: "gasp2";
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+
+}
+
+span {
+    font-family: "gasp3";
+    font-weight: 400;
+    font-size: 12px;
+    // font-family: gasp;
+    color: #F6F6F6BF;
+    opacity: 75%;
+}
+
+a {
+    font-family: 'gasp3';
+    font-weight: 400;
+}
+
+
+
+
+
+
+.mint-btn {
+    position: relative;
+    padding: 12px 40px;
+    border-radius: 9999px;
+    /* fully rounded */
+    font-weight: bold;
+    color: white;
+    background: black;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+}
+
+.one::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:radial-gradient(circle at 10% 210%, rgba(255,255,255,0.3), transparent 30%);
+
+}
