@@ -59,6 +59,9 @@ a {
     font-family: 'gasp3';
     font-weight: 400;
 }
+button{
+    font-family: 'gasp2';
+}
 
 
 .mint-btn {
@@ -91,5 +94,24 @@ a {
 
 
 .shadows{
-     box-shadow: 10px 0px 4px 20px rgba(255, 255, 255, 0.3);
+     box-shadow: 10px 0px 17px 0px rgba(255, 255, 255, 0.3);
+    //  z-index: 10;
+}
+
+.main-shadow::after{
+    content: '';
+    position: absolute;
+    top: 0;
+    // box-sh
+}
+.sub-shadow{
+  background:white;
+  filter: blur(10px);
+  position: absolute;
+  height: 12px;
+  top: 32px;  
+  width: 20px;
+  left: -1px;
+  z-index: -1;
+
 }
