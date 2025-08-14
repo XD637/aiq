@@ -59,7 +59,8 @@ a {
     font-family: 'gasp3';
     font-weight: 400;
 }
-button{
+
+button {
     font-family: 'gasp2';
 }
 
@@ -76,42 +77,85 @@ button{
 }
 
 .one::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background:radial-gradient(circle at 10% 210%, rgba(255,255,255,0.3), transparent 30%);
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 10% 200%, rgba(255, 255, 255, 0.3), transparent 30%);
 
 }
-// .main-shadow{
-//     position:'absolute';
-//     top: 0;
-//     box-shadow: 90px 20px 20px rgba(255, 255, 255, 0.3);
-//     height:20px;
-//     width: 40px;
-    
-// }
+.after-class::after{
+     content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 70% -30%, rgba(255, 255, 255, 0.3), transparent 30%);
+}
+
+.two::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 90% -80%, rgba(255, 255, 255, 0.3), transparent 30%);
+
+}
 
 
-.shadows{
-     box-shadow: 10px 0px 17px 0px rgba(255, 255, 255, 0.3);
+.shadows {
+    box-shadow: 10px 0px 17px 0px rgba(255, 255, 255, 0.3);
     //  z-index: 10;
 }
 
-.main-shadow::after{
+
+.sub-shadow {
+    background: white;
+    filter: blur(10px);
+    position: absolute;
+    height: 12px;
+    top: 32px;
+    width: 20px;
+    left: -1px;
+    z-index: -1;
+
+}
+
+
+.main-shadow-demo {
+    position: absolute;
+    top: 0px;
+
+    left: 75%;
+    width: 20px;
+    height: 30px;
+    background: #E4E4E4;
+    filter: blur(10px);
+    z-index: -1;
+}
+
+.sub-shadow-demo {
+    position: absolute;
+    top: 33%;
+    left: 0%;
+    width: 20px;
+    height: 30px;
+    background: #E4E4E4;
+    filter: blur(10px);
+    z-index: -1;
+}
+
+.btn::before {
     content: '';
     position: absolute;
-    top: 0;
-    // box-sh
-}
-.sub-shadow{
-  background:white;
-  filter: blur(10px);
-  position: absolute;
-  height: 12px;
-  top: 32px;  
-  width: 20px;
-  left: -1px;
-  z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 10% 210%, rgba(255, 255, 255, 0.3), transparent 30%);
 
+}
+
+.drop_down {
+    position: absolute;
+    right: 0;
+    top: 30%;
+    padding-right: 10px;
 }

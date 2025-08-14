@@ -3,13 +3,15 @@ import search_icon from "../assets/search_icon.png";
 import AIQ_logo from "../assets/AIQ_logo.png";
 import fff from "../assets/MintIcon.png";
 import i_icon from "../assets/i_icon.svg";
-
+import { Link } from "react-router-dom";
 function App() {
   return (
     <div className="h-screen">
       <div className="flex justify-between items-center bg-[#131313] px-[120px] py-[14px] text-white font-[Haas_Grot_Disp_Trial]">
         <div>
-          <img src={AIQ_logo} alt="AiQ logo" />
+          <Link to="/">
+            <img src={AIQ_logo} alt="AiQ logo" />
+          </Link>
         </div>
 
         <div>
@@ -21,17 +23,13 @@ function App() {
         </div>
 
         <div className="flex items-center relative" style={{ zIndex: 20 }}>
-          <button
-            className="whitespace-nowrap mr-[32px] border-white border font-medium bg-black rounded-xl py-2 px-7 shadows relative"
-            style={{
-              background:
-                "radial-gradient(circle at 85% -30%, rgba(255,255,255,0.3), transparent 30%)",
-            }}
-          >
-            connect wallet{" "}
-          </button>
-          <div className="main-shadow"></div>
-          <div className="sub-shadow"></div>
+          <div className="relative">
+            <button className="whitespace-nowrap after-class btn mr-[32px] cursor-pointer border-white border font-medium bg-black rounded-xl py-2 px-7">
+              connect wallet{" "}
+            </button>
+            <div className="main-shadow-demo"></div>
+            <div className="sub-shadow-demo"></div>
+          </div>
           <img src={search_icon} alt="" className="h-6 w-6" />
         </div>
       </div>
@@ -90,11 +88,8 @@ function App() {
               style={{ zIndex: 29 }}
             >
               <button
-                className="whitespace-nowrap border one h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
-                style={{
-                  background:
-                    "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
-                }}
+                className="whitespace-nowrap border one two h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
+                
               >
                 Mint
               </button>
@@ -145,11 +140,11 @@ function App() {
               style={{ zIndex: 29 }}
             >
               <button
-                className="whitespace-nowrap border one h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
-                style={{
-                  background:
-                    "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
-                }}
+                className="whitespace-nowrap border one two h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
+                // style={{
+                //   background:
+                //     "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
+                // }}
               >
                 Mint
               </button>
@@ -200,11 +195,11 @@ function App() {
               style={{ zIndex: 29 }}
             >
               <button
-                className="whitespace-nowrap border one h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
-                style={{
-                  background:
-                    "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
-                }}
+                className="whitespace-nowrap border one two h-[41px] w-[237px]  bg-black mx-auto rounded-xl font-medium  relative  text-[16px] "
+                // style={{
+                //   background:
+                //     "radial-gradient(circle at 85% -80%, rgba(255,255,255,0.3), transparent 30%)",
+                // }}
               >
                 Mint
               </button>
