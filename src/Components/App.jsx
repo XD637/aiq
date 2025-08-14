@@ -15,6 +15,11 @@ import claim from  '../assets/claim.svg'
 
 
 function App() {
+  // Wallet/account hooks (must be declared before use)
+  const { isConnected, address } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { data: walletClient } = useWalletClient();
+
   // Copy address state for ConnectButton
   const [copied, setCopied] = React.useState(false);
   const handleCopy = (address) => (e) => {
@@ -25,10 +30,39 @@ function App() {
       setTimeout(() => setCopied(false), 1200);
     }
   };
-  // Wallet/account hooks (must be declared before use)
-  const { isConnected, address } = useAccount();
-  const { disconnect } = useDisconnect();
-  const { data: walletClient } = useWalletClient();
+
+  // Switch to Holesky network after wallet connect
+  React.useEffect(() => {
+    async function switchToHolesky() {
+      if (isConnected && window.ethereum) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x4268' }], // 17000 in hex
+          });
+        } catch (switchError) {
+          // If not added, try to add Holesky
+          if (switchError.code === 4902) {
+            try {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: '0x4268',
+                  chainName: 'Holesky',
+                  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                  rpcUrls: ['https://ethereum-holesky.publicnode.com'],
+                  blockExplorerUrls: ['https://holesky.etherscan.io'],
+                }],
+              });
+            } catch (addError) {
+              // ignore
+            }
+          }
+        }
+      }
+    }
+    switchToHolesky();
+  }, [isConnected]);
 
   // User balances
   const [stablecoinBalance, setStablecoinBalance] = React.useState('');
@@ -100,7 +134,7 @@ function App() {
   const stablecoins = {
     USDT: { address: '0x0938E316F1B7F517F6CeaAf9fE4D4b25266b8D2C', decimals: 6 },
     USDC: { address: '0xc247beDaF2745A22A93a7A2Da41457FcBdEf686b', decimals: 6 },
-    DAI:  { address: '0x06FF24582aaAb1521A5dbBFfc9b16C870FB56Afa', decimals: 6 },
+    DAI:  { address: '0x06FF24582aaAb1521A5dbBFfc9b16C870FB56Afa', decimals: 18 },
   };
   const mintingAddress = '0x25F9435F4439DD798C71fB202174a05fa4D8d3b5';
   const mintingAbi = ["function exchange(address stablecoin, uint256 stablecoinAmount) external"];
