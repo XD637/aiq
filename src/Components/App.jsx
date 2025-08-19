@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
@@ -107,6 +108,17 @@ function App() {
     fetchBalances();
   }, [isConnected, address, stablecoin, fetchBalances]);
 
+  // Updated staking contract (moved above all state/effect usage)
+  const stakingAddress = '0x1FFFFFaA7AcfA79fA774c433cd2c1fA18141F125';
+  const aiqTokenAddress = '0xE2A08540C244434a1afd19A7ff2B38f284B3458B';
+  const usdtTokenAddress = '0x0938E316F1B7F517F6CeaAf9fE4D4b25266b8D2C';
+  const stakingAbi = [
+    "function stake(uint256 amount, uint8 plan) external",
+    "function claimRewards(uint256 stakeId) external",
+    "function getStake(address user, uint256 stakeId) view returns (tuple(uint256 id, uint256 amount, uint256 reward, uint256 startTime, uint256 unlockTime, bool claimedPrincipal, bool claimedReward))",
+    "function stakeCount(address user) view returns (uint256)"
+  ];
+
   // Staking states
   const [stakeAmount, setStakeAmount] = React.useState('');
   const [stakePlan, setStakePlan] = React.useState('THREE_MONTHS');
@@ -114,9 +126,41 @@ function App() {
   const [stakeStep, setStakeStep] = React.useState('idle'); // idle | approving | confirming | staking
 
   // Claim rewards states
-  const [claimPlan, setClaimPlan] = React.useState('THREE_MONTHS');
+  const [claimStakeId, setClaimStakeId] = React.useState('');
   const [claimLoading, setClaimLoading] = React.useState(false);
   const [claimStep, setClaimStep] = React.useState('idle'); // idle | confirming | claiming
+  const [userStakes, setUserStakes] = React.useState([]);
+
+  // Fetch user stakes for claim dropdown
+  React.useEffect(() => {
+    async function fetchStakes() {
+      if (!isConnected || !window.ethereum || !address) {
+        setUserStakes([]);
+        return;
+      }
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const staking = new ethers.Contract(stakingAddress, stakingAbi, provider);
+        const count = await staking.stakeCount(address);
+        let stakes = [];
+        for (let i = 1; i <= Number(count); i++) {
+          const stake = await staking.getStake(address, i);
+          stakes.push({
+            id: stake.id,
+            amount: stake.amount,
+            reward: stake.reward,
+            unlockTime: stake.unlockTime,
+            claimedPrincipal: stake.claimedPrincipal,
+            claimedReward: stake.claimedReward
+          });
+        }
+        setUserStakes(stakes);
+      } catch {
+        setUserStakes([]);
+      }
+    }
+    fetchStakes();
+  }, [isConnected, address, stakingAddress, claimLoading]);
 
   // Animated ellipsis for status text
   const [dotCount, setDotCount] = React.useState(0);
@@ -148,13 +192,7 @@ function App() {
     "function allowance(address owner, address spender) view returns (uint256)"
   ];
 
-  // Staking contract
-  const stakingAddress = '0xD77fC167E8f047927ddf62BE32EB39dF3C1d87d4';
-  const aiqTokenAddress = '0xE2A08540C244434a1afd19A7ff2B38f284B3458B';
-  const stakingAbi = [
-    "function stake(uint256 amount, uint8 plan) external",
-    "function claimRewards(uint8 plan) external"
-  ];
+  // ...existing code...
 
   // Calculate AIQ to receive (matches contract logic: 100 stablecoins = 1 AIQ, using smallest units)
   let aiqAmount = '';
@@ -274,7 +312,7 @@ function App() {
     }
   };
 
-  // Claim rewards handler
+  // Claim rewards handler (now requires stakeId)
   const handleClaimRewards = async () => {
     if (!isConnected) {
       notifyError('Please connect your wallet first.');
@@ -284,19 +322,23 @@ function App() {
       notifyError('No wallet found!');
       return;
     }
+    if (!claimStakeId || isNaN(claimStakeId) || Number(claimStakeId) < 1) {
+      notifyError('Select a valid stake ID');
+      return;
+    }
     setClaimLoading(true);
     setClaimStep('confirming');
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const staking = new ethers.Contract(stakingAddress, stakingAbi, signer);
-      const tx = await staking.claimRewards(planMap[claimPlan]);
+      const tx = await staking.claimRewards(Number(claimStakeId));
       setClaimStep('claiming');
       await tx.wait();
       setClaimLoading(false);
       setClaimStep('idle');
-  notifySuccess(<span>Claim successful! <a href={`https://holesky.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-400">View on Etherscan</a></span>);
-  fetchBalances();
+      notifySuccess(<span>Claim successful! <a href={`https://holesky.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" className="underline text-blue-400">View on Etherscan</a></span>);
+      fetchBalances();
     } catch (err) {
       setClaimLoading(false);
       setClaimStep('idle');
@@ -498,19 +540,37 @@ function App() {
                 </div>
                 <figcaption className="font-medium text-2xl mt-2">Claim Rewards</figcaption>
               </figure>
-              {/* Plan selector for claim and reward display */}
+              {/* StakeId selector and reward display */}
               <div className="flex flex-col gap-1 px-4 pb-2 flex-grow">
-                <label className="text-sm mb-1">Subscribed Plan</label>
-                <Select value={claimPlan} onValueChange={setClaimPlan}>
+                <label className="text-sm mb-1">Your Stakes</label>
+                <Select value={claimStakeId} onValueChange={setClaimStakeId}>
                   <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
-                    <SelectValue placeholder="Select plan" />
+                    <SelectValue placeholder="Select stake" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
-                    <SelectItem value="THREE_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">3 Months</SelectItem>
-                    <SelectItem value="SIX_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">6 Months</SelectItem>
-                    <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">12 Months</SelectItem>
+                    {userStakes.length === 0 ? (
+                      <div className="px-4 py-2 text-[#888] select-none cursor-not-allowed">No stakes found</div>
+                    ) : (
+                      userStakes.map((s) => (
+                        <SelectItem value={String(s.id)} key={s.id} className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">
+                          Stake #{s.id} - {Number(ethers.formatUnits(s.amount, 18)).toLocaleString()} AIQ
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
+                {/* Show USDT reward for selected stake */}
+                {claimStakeId && userStakes.length > 0 && (() => {
+                  const stake = userStakes.find(s => String(s.id) === String(claimStakeId));
+                  if (!stake) return null;
+                  return (
+                    <div className="text-xs text-[#aaa] mt-1 mb-1">
+                      USDT reward: <span className="font-bold text-white">{Number(ethers.formatUnits(stake.reward, 6)).toLocaleString()}</span>
+                      <br />Unlocks: <span className="text-white">{new Date(Number(stake.unlockTime) * 1000).toLocaleString()}</span>
+                      <br />{stake.claimedReward ? <span className="text-green-400">Reward claimed</span> : stake.claimedPrincipal ? <span className="text-yellow-400">Principal claimed</span> : <span className="text-blue-400">Active</span>}
+                    </div>
+                  );
+                })()}
               </div>
               <div
                 className="mt-auto flex flex-col items-center pb-1 mb-4"
@@ -525,7 +585,7 @@ function App() {
                     cursor: claimLoading ? 'not-allowed' : 'pointer',
                   }}
                   onClick={handleClaimRewards}
-                  disabled={!isConnected || claimLoading}
+                  disabled={!isConnected || claimLoading || !claimStakeId}
                 >
                   {claimLoading
                     ? claimStep === 'confirming'
