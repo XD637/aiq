@@ -87,7 +87,11 @@ function App() {
       const token = stablecoins[stablecoin];
       const erc20 = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
       const bal = await erc20.balanceOf(address);
-      const decimals = token.decimals;
+      // Dynamically fetch decimals from contract
+      let decimals = token.decimals;
+      try {
+        decimals = await erc20.decimals();
+      } catch {}
       setStablecoinBalance(Number(ethers.formatUnits(bal, decimals)).toLocaleString());
       // AIQ balance
       const aiq = new ethers.Contract(aiqTokenAddress, ["function balanceOf(address) view returns (uint256)"], provider);
@@ -136,7 +140,8 @@ function App() {
     USDC: { address: '0xc247beDaF2745A22A93a7A2Da41457FcBdEf686b', decimals: 6 },
     DAI:  { address: '0x06FF24582aaAb1521A5dbBFfc9b16C870FB56Afa', decimals: 18 },
   };
-  const mintingAddress = '0x25F9435F4439DD798C71fB202174a05fa4D8d3b5';
+  // Updated minter contract address
+  const mintingAddress = '0xE002A386d2672f66a2900772E85df7Ee3546A4E6';
   const mintingAbi = ["function exchange(address stablecoin, uint256 stablecoinAmount) external"];
   const erc20Abi = [
     "function approve(address spender, uint256 amount) external returns (bool)",
@@ -151,10 +156,19 @@ function App() {
     "function claimRewards(uint8 plan) external"
   ];
 
-  // Calculate AIQ to receive
+  // Calculate AIQ to receive (matches contract logic: 100 stablecoins = 1 AIQ, using smallest units)
   let aiqAmount = '';
   if (amount && !isNaN(amount)) {
-    aiqAmount = (parseFloat(amount) / 100).toString();
+    const token = stablecoins[stablecoin];
+    const decimals = token.decimals;
+    // Only allow whole tokens
+    const wholeTokenAmount = Math.floor(parseFloat(amount));
+    if (wholeTokenAmount % 100 === 0) {
+      // Calculate AIQ amount in display units
+      aiqAmount = (parseFloat(amount) / 100).toString();
+    } else {
+      aiqAmount = '';
+    }
   }
   const handleMint = async () => {
     if (!isConnected) {
@@ -169,11 +183,18 @@ function App() {
       notifyError('Enter a valid amount');
       return;
     }
+    // Only allow whole tokens divisible by 100
+    const token = stablecoins[stablecoin];
+    const decimals = token.decimals;
+    const wholeTokenAmount = Math.floor(parseFloat(amount));
+    if (wholeTokenAmount % 100 !== 0) {
+      notifyError('Amount must be a whole number divisible by 100');
+      return;
+    }
     setLoading(true);
     setMintStep('approving');
     try {
-      const token = stablecoins[stablecoin];
-      const parsedAmount = ethers.parseUnits(amount, token.decimals);
+      const parsedAmount = ethers.parseUnits(amount, decimals);
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const tokenContract = new ethers.Contract(token.address, erc20Abi, signer);
