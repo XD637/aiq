@@ -362,7 +362,7 @@ function App() {
       <div className="min-h-screen flex flex-col">
         <div className="flex justify-between items-center bg-[#131313] px-[120px] py-[14px] text-white font-[Haas_Grot_Disp_Trial] flex-shrink-0">
           <div>
-            <img src={AIQ_logo} alt="AiQ logo" style={{ height: 46, width: 39 }} />
+            <img src={AIQ_logo} alt="AiQ logo" style={{ height: 60, width: 39 }} />
           </div>
           <div>
             <a href="">Products</a>
