@@ -359,21 +359,25 @@ function App() {
           className: 'font-medium',
         }}
       />
+      {/* Responsive wrapper */}
       <div className="min-h-screen flex flex-col">
-        <div className="flex justify-between items-center bg-[#131313] px-[120px] py-[14px] text-white font-[Haas_Grot_Disp_Trial] flex-shrink-0">
+        {/* Header: responsive padding and flex */}
+        <div className="flex justify-between items-center bg-[#131313] px-4 sm:px-8 md:px-16 lg:px-[120px] py-[14px] text-white font-[Haas_Grot_Disp_Trial] flex-shrink-0">
           <div>
             <img src={AIQ_logo} alt="AiQ logo" style={{ height: 60, width: 39 }} />
           </div>
-          <div>
-            <a href="">Products</a>
-            <a href="" className="px-[40px]">Market</a>
-            <a href="">$AIG</a>
+          <div className="flex-1 flex justify-center lg:ml-40">
+            <nav className="flex gap-4 sm:gap-8 md:gap-12 lg:gap-16">
+              <a href="">Products</a>
+              <a href="" className="">Market</a>
+              <a href="">$AIG</a>
+            </nav>
           </div>
           <div className="flex items-center relative" style={{ zIndex: 20 }}>
             <ConnectButton.Custom>
               {({ account, openConnectModal, mounted }) => (
                 <button
-                  className="whitespace-nowrap mr-[32px] border-white border font-medium bg-black rounded-xl py-2 px-7 shadows relative cursor-pointer flex items-center gap-2"
+                  className="whitespace-nowrap mr-2 sm:mr-4 md:mr-8 border-white border font-medium bg-black rounded-xl py-2 px-4 sm:px-7 shadows relative cursor-pointer flex items-center gap-2"
                   style={{
                     background:
                       "radial-gradient(circle at 85% -30%, rgba(255,255,255,0.3), transparent 30%)",
@@ -404,13 +408,14 @@ function App() {
             <img src={search_icon} alt="" className="h-6 w-6" />
           </div>
         </div>
-  <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] flex-1 flex flex-col justify-center">
-          <div className="text-white pt-8 mb-4">
+        {/* Main content: responsive flex and gap */}
+        <div className="bg-gradient-to-t from-[#101010] to-[#2A2A2A] flex-1 flex flex-col justify-center">
+          <div className="text-white mb-4">
             <h1 className="mb-2 text-center ">Mint, Stake and Earn</h1>
           </div>
-          <div className="flex justify-center gap-4 items-stretch">
+          <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-4 lg:gap-8 items-stretch px-2 sm:px-4 md:px-0 w-full max-w-[1100px] mx-auto">
             {/* Mint Card */}
-            <div className="bg-[#141414] text-white rounded-2xl pt-4 max-w-[344px] w-full flex flex-col whitespace-nowrap">
+            <div className="bg-[#141414] text-white rounded-2xl pt-4 max-w-[344px] w-full flex flex-col whitespace-nowrap min-w-0">
               <figure className="mb-4 flex justify-center flex-col items-center ">
                 <div className="bg-[#1E1E1E] rounded-full m-auto    w-[88px] h-[88px] flex items-center justify-center ">
                   <img src={fff} alt="" className="  p-[17px] m-auto " />
@@ -473,7 +478,7 @@ function App() {
               </div>
             </div>
             {/* Staking Card */}
-            <div className="bg-[#141414] text-white rounded-2xl pt-4 max-w-[344px] min-h-[344px] w-full flex flex-col justify-between">
+            <div className="bg-[#141414] text-white rounded-2xl pt-4 max-w-[344px] min-h-[344px] w-full flex flex-col justify-between min-w-0">
               <figure className="mb-4 flex justify-center flex-col items-center ">
                 <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
                   <img src={staking_icon} alt="" className="p-[17px] m-auto " />
@@ -484,10 +489,10 @@ function App() {
               <div className="flex flex-col gap-1 px-4 pb-2 flex-grow">
                 <label className="text-sm mb-1">Choose Plan</label>
                 <Select value={stakePlan} onValueChange={setStakePlan}>
-                  <SelectTrigger className="bg-[#232323] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
+                  <SelectTrigger className="bg-[#232323] text-white rounded-xl placeholder-white px-4 py-2 border border-white min-h-[44px] w-full focus:ring-0 focus:border-[#aaa] hover:bg-[#23282a] hover:border-[#aaa] transition-colors">
                     <SelectValue placeholder="Select plan" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full">
+                  <SelectContent className="bg-[#232323] text-white rounded-xl border border-white w-full ">
                     <SelectItem value="THREE_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">3 Months (1%/mo)</SelectItem>
                     <SelectItem value="SIX_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">6 Months (1.5%/mo)</SelectItem>
                     <SelectItem value="TWELVE_MONTHS" className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">12 Months (2%/mo)</SelectItem>
@@ -496,7 +501,7 @@ function App() {
                 <div className="text-xs text-[#aaa] mt-1 mb-1">AIQ balance: <span className="font-bold text-white">{aiqBalance !== '' ? aiqBalance : '--'}</span></div>
                 <label className="text-sm mt-2 mb-1">AIQ Amount</label>
                 <Input
-                  className="bg-[#222] text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&[type=number]]:appearance-none"
+                  className="bg-[#222] placeholder-white text-white rounded-xl px-4 py-2 border border-white min-h-[44px] w-full focus:outline-none focus:ring-0 focus:border-white transition-all duration-150 placeholder-[#888] shadow-sm hover:border-[#888] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&[type=number]]:appearance-none"
                   type="number"
                   min="0"
                   value={stakeAmount}
@@ -533,7 +538,7 @@ function App() {
               </div>
             </div>
             {/* Claim Rewards Card */}
-            <div className="bg-[#141414] text-white rounded-2xl pt-4 max-w-[344px] w-full flex flex-col">
+            <div className="bg-[#141414] text-white rounded-2xl pt-4 max-w-[344px] w-full flex flex-col min-w-0">
               <figure className="mb-4 flex justify-center flex-col items-center ">
                 <div className="bg-[#1E1E1E] rounded-full m-auto w-[88px] h-[88px] flex items-center justify-center ">
                   <img src={claim} alt="" className="p-[17px] m-auto " />
@@ -552,7 +557,14 @@ function App() {
                       <div className="px-4 py-2 text-[#888] select-none cursor-not-allowed">No stakes found</div>
                     ) : (
                       userStakes.map((s) => (
-                        <SelectItem value={String(s.id)} key={s.id} className="hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors">
+                        <SelectItem
+                          value={String(s.id)}
+                          key={s.id}
+                          className={
+                            `hover:bg-[#33383a] !bg-[#232323] cursor-pointer transition-colors` +
+                            (String(claimStakeId) === String(s.id) ? ' !text-white font-bold' : ' text-[#aaa]')
+                          }
+                        >
                           Stake #{s.id} - {Number(ethers.formatUnits(s.amount, 18)).toLocaleString()} AIQ
                         </SelectItem>
                       ))
@@ -600,6 +612,35 @@ function App() {
           </div>
         </div>
       </div>
+      {/* Responsive styles */}
+      <style>{`
+        @media (max-width: 900px) {
+          .min-h-screen > div > div.flex-1.flex.flex-col.justify-center {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+          .min-h-screen > div > div.flex-1.flex.flex-col.justify-center > div.flex {
+            flex-direction: column !important;
+            gap: 1rem !important;
+          }
+        }
+        @media (max-width: 600px) {
+          .min-h-screen > div.flex {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+          .min-h-screen > div.flex > div.flex-1 {
+            margin-left: 0 !important;
+          }
+          .min-h-screen > div > div.flex-1.flex.flex-col.justify-center > div.flex {
+            flex-direction: column !important;
+            gap: 0.75rem !important;
+          }
+          .max-w-[344px] {
+            max-width: 100vw !important;
+          }
+        }
+      `}</style>
     </>
   );
 }
