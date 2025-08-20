@@ -8,7 +8,7 @@ import { Copy } from 'lucide-react';
 import { ethers } from 'ethers';
 import { Toaster } from './ui/sonner';
 import { notifySuccess, notifyError } from '../lib/notify';
-import AIQ_logo from '../assets/AIQ_logo.png';
+import AIQ_logo from '../assets/AIQ_Logo1.png';
 import search_icon from '../assets/search_icon.png';
 import fff from '../assets/MintIcon.png';
 import staking_icon from  '../assets/staking_icon.svg'
@@ -362,7 +362,7 @@ function App() {
       <div className="min-h-screen flex flex-col">
         <div className="flex justify-between items-center bg-[#131313] px-[120px] py-[14px] text-white font-[Haas_Grot_Disp_Trial] flex-shrink-0">
           <div>
-            <img src={AIQ_logo} alt="AiQ logo" />
+            <img src={AIQ_logo} alt="AiQ logo" style={{ height: 46, width: 39 }} />
           </div>
           <div>
             <a href="">Products</a>
