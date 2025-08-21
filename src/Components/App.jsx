@@ -571,18 +571,24 @@ function App() {
                     )}
                   </SelectContent>
                 </Select>
-                {/* Show USDT reward for selected stake */}
-                {claimStakeId && userStakes.length > 0 && (() => {
-                  const stake = userStakes.find(s => String(s.id) === String(claimStakeId));
-                  if (!stake) return null;
-                  return (
-                    <div className="text-xs text-[#aaa] mt-1 mb-1">
-                      USDT reward: <span className="font-bold text-white">{Number(ethers.formatUnits(stake.reward, 6)).toLocaleString()}</span>
-                      <br />Unlocks: <span className="text-white">{new Date(Number(stake.unlockTime) * 1000).toLocaleString()}</span>
-                      <br />{stake.claimedReward ? <span className="text-green-400">Reward claimed</span> : stake.claimedPrincipal ? <span className="text-yellow-400">Principal claimed</span> : <span className="text-blue-400">Active</span>}
-                    </div>
-                  );
-                })()}
+                {/* Always show a card below the select, aligned with input fields */}
+                <div className="mt-2 mb-2 p-4 rounded-xl bg-[#222] border border-[#333] min-h-[60px] flex flex-col justify-center items-start w-full" style={{marginLeft: 0, marginRight: 0}}>
+                  {claimStakeId && userStakes.length > 0 ? (
+                    (() => {
+                      const stake = userStakes.find(s => String(s.id) === String(claimStakeId));
+                      if (!stake) return <span className="text-[#aaa]">No rewards</span>;
+                      return (
+                        <>
+                          <div className="text-base text-white font-semibold">Rewards: <span className="text-green-400">USDT {Number(ethers.formatUnits(stake.reward, 6)).toLocaleString()}</span></div>
+                          <div className="text-xs text-[#aaa] mt-1">Unlocks: <span className="text-white">{new Date(Number(stake.unlockTime) * 1000).toLocaleString()}</span></div>
+                          <div className="text-xs mt-1">{stake.claimedReward ? <span className="text-green-400">Reward claimed</span> : stake.claimedPrincipal ? <span className="text-yellow-400">Principal claimed</span> : <span className="text-blue-400">Active</span>}</div>
+                        </>
+                      );
+                    })()
+                  ) : (
+                    <span className="text-[#aaa]">No rewards</span>
+                  )}
+                </div>
               </div>
               <div
                 className="mt-auto flex flex-col items-center pb-1 mb-4"
